@@ -1,0 +1,1218 @@
+===== Config file =====
+[printer]
+kinematics = corexy
+max_velocity = 500
+max_accel = 15000
+max_z_velocity = 8
+square_corner_velocity = 5.0
+
+[stepper_z]
+step_pin = gpio19
+dir_pin = gpio28
+enable_pin = !gpio2
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = ^!gpio25
+position_min = -5.0
+position_max = 120
+homing_speed = 12
+position_endstop = 0.2
+
+[tmc2209 stepper_z]
+uart_pin = gpio9
+tx_pin = gpio8
+uart_address = 1
+run_current = 0.5
+stealthchop_threshold = 999999
+
+[stepper_x]
+step_pin = gpio11
+dir_pin = gpio10
+enable_pin = !gpio12
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = tmc2209_stepper_x:virtual_endstop
+position_endstop = 0
+position_max = 110
+homing_speed = 40
+homing_retract_dist = 0
+
+[tmc2209 stepper_x]
+uart_pin = gpio9
+tx_pin = gpio8
+uart_address = 0
+run_current = 0.5
+stealthchop_threshold = 999999
+diag_pin = ^gpio4
+driver_sgthrs = 30
+
+[stepper_y]
+step_pin = gpio6
+dir_pin = gpio5
+enable_pin = !gpio7
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = tmc2209_stepper_y:virtual_endstop
+position_endstop = 0
+position_max = 160
+homing_speed = 40
+homing_retract_dist = 0
+
+[tmc2209 stepper_y]
+uart_pin = gpio9
+tx_pin = gpio8
+uart_address = 2
+run_current = 0.5
+stealthchop_threshold = 999999
+diag_pin = ^gpio3
+driver_sgthrs = 32
+
+[pwm_tool LASER]
+pin = gpio20
+shutdown_value = 0
+
+[gcode_macro M02]
+gcode = 
+
+[gcode_macro M3]
+gcode = 
+	SET_PIN PIN=LASER VALUE=1
+	
+	
+	G4 P10
+
+[gcode_macro M5]
+gcode = 
+	G4 P2
+	SET_PIN PIN=LASER VALUE=0
+
+[gcode_macro LASER_ON]
+gcode = 
+	
+	SET_PIN PIN=LASER VALUE=1
+
+[gcode_macro LASER_OFF]
+gcode = 
+	SET_PIN PIN=LASER VALUE=0
+
+[gcode_macro G00]
+gcode = 
+	G1 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G01]
+gcode = 
+	G1 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G02]
+gcode = 
+	G2 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G03]
+gcode = 
+	G2 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G04]
+gcode = 
+	G4 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro M03]
+gcode = 
+	M3 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro M05]
+gcode = 
+	M5 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[mcu]
+serial = /dev/serial0
+restart_method = command
+
+[neopixel board_neopixel]
+pin = gpio24
+chain_count = 12
+color_order = GRB
+initial_red = 0.0
+initial_green = 0.0
+initial_blue = 0.5
+
+[virtual_sdcard]
+path = /home/ooe/printer_data/gcodes
+
+[display_status]
+
+[pause_resume]
+
+[gcode_arcs]
+resolution = 0.1
+
+[gcode_macro CANCEL_PRINT]
+rename_existing = BASE_CANCEL_PRINT
+gcode = 
+	BASE_CANCEL_PRINT
+
+[homing_override]
+set_position_x = 0
+set_position_y = 0
+set_position_z = 0
+gcode = 
+	{% set home_all = 'X' not in params and 'Y' not in params and 'Z' not in params %}
+	{% if home_all or 'X' in params %}
+	_HOME_X
+	{% endif %}
+	{% if home_all or 'Y' in params %}
+	_HOME_Y
+	{% endif %}
+	{% if home_all or 'Z' in params %}
+	
+	
+	{% endif %}
+axes = xyz
+
+[gcode_macro PAUSE]
+rename_existing = BASE_PAUSE
+gcode = 
+
+[gcode_macro RESUME]
+rename_existing = BASE_RESUME
+gcode = 
+
+[gcode_macro MOTOR_OFF]
+gcode = 
+	M18
+
+[gcode_macro _HOME_X]
+gcode = 
+	G28 X
+	G91
+	G1 X+5 F3000
+	G4 P2000
+
+[gcode_macro _HOME_Y]
+gcode = 
+	G28 Y
+	G91
+	G1 Y+5 F3000
+	G4 P100
+
+[gcode_macro TEST_PRINT]
+gcode = 
+	G28
+	{% for i in range(98) %}
+	G90
+	G1 X{i * 0.5} Y{i * 0.5} F5000
+	G91
+	M3
+	G1 X50 F12000
+	G1 Y50
+	G1 X-50
+	G1 Y-50
+	M5
+	{% endfor %}
+	G90
+	G1 X0
+	G1 Y0
+
+[input_shaper]
+shaper_type_x = zv
+shaper_freq_x = 83.2
+shaper_type_y = zv
+shaper_freq_y = 58.6
+=======================
+Loaded MCU 'mcu' 106 commands (v0.12.0-85-gd785b396a / gcc: (15:8-2019-q3-1+b1) 8.3.1 20190703 (release) [gcc-8-branch revision 273027] binutils: (2.35.2-2+14+b2) 2.35.2)
+MCU 'mcu' config: ADC_MAX=4095 BUS_PINS_i2c0a=gpio0,gpio1 BUS_PINS_i2c0b=gpio4,gpio5 BUS_PINS_i2c0c=gpio8,gpio9 BUS_PINS_i2c0d=gpio12,gpio13 BUS_PINS_i2c0e=gpio16,gpio17 BUS_PINS_i2c0f=gpio20,gpio21 BUS_PINS_i2c0g=gpio24,gpio25 BUS_PINS_i2c0h=gpio28,gpio29 BUS_PINS_i2c1a=gpio2,gpio3 BUS_PINS_i2c1b=gpio6,gpio7 BUS_PINS_i2c1c=gpio10,gpio11 BUS_PINS_i2c1d=gpio14,gpio15 BUS_PINS_i2c1e=gpio18,gpio19 BUS_PINS_i2c1f=gpio22,gpio23 BUS_PINS_i2c1g=gpio26,gpio27 BUS_PINS_spi0a=gpio0,gpio3,gpio2 BUS_PINS_spi0b=gpio4,gpio7,gpio6 BUS_PINS_spi0c=gpio16,gpio19,gpio18 BUS_PINS_spi0d=gpio20,gpio23,gpio22 BUS_PINS_spi1a=gpio8,gpio11,gpio10 BUS_PINS_spi1b=gpio12,gpio15,gpio14 BUS_PINS_spi1c=gpio24,gpio27,gpio26 CLOCK_FREQ=12000000 MCU=rp2040 PWM_MAX=255 RECEIVE_WINDOW=192 SERIAL_BAUD=250000 STATS_SUMSQ_BASE=256 STEPPER_BOTH_EDGE=1
+Configured MCU 'mcu' (1024 moves)
+Args: ['/home/ooe/klipper/klippy/klippy.py', '/home/ooe/printer_data/config/printer.cfg', '-I', '/home/ooe/printer_data/comms/klippy.serial', '-l', '/home/ooe/printer_data/logs/klippy.log', '-a', '/home/ooe/printer_data/comms/klippy.sock']
+Git version: 'v0.12.0-396-gb7233d119'
+Branch: master
+Remote: origin
+Tracked URL: https://github.com/Klipper3d/klipper
+CPU: 4 core ?
+Python: '3.9.2 (default, Feb 28 2021, 17:03:44) \n[GCC 10.2.1 20210110]'
+webhooks client 548392688464: {'program': 'Moonraker', 'version': 'v0.9.3-3-gccfe32f'}
+=============== Log rollover at Fri May  9 13:33:59 2025 ===============
+Stats 38.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2193 bytes_read=5847 bytes_retransmit=0 bytes_invalid=0 send_seq=207 receive_seq=207 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000193  sysload=2.10 cputime=1.513 memavail=3562808 print_time=0.000 buffer_time=0.000 print_stall=0
+Stats 39.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2199 bytes_read=5874 bytes_retransmit=0 bytes_invalid=0 send_seq=208 receive_seq=208 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000192  sysload=2.10 cputime=1.519 memavail=3562808 print_time=0.000 buffer_time=0.000 print_stall=0
+Stats 40.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2205 bytes_read=5890 bytes_retransmit=0 bytes_invalid=0 send_seq=209 receive_seq=209 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000192  sysload=1.93 cputime=1.523 memavail=3562808 print_time=0.000 buffer_time=0.000 print_stall=0
+Stats 41.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2211 bytes_read=5906 bytes_retransmit=0 bytes_invalid=0 send_seq=210 receive_seq=210 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000191  sysload=1.93 cputime=1.527 memavail=3562344 print_time=0.000 buffer_time=0.000 print_stall=0
+Stats 42.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2217 bytes_read=5922 bytes_retransmit=0 bytes_invalid=0 send_seq=211 receive_seq=211 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000192  sysload=1.93 cputime=1.532 memavail=3562344 print_time=0.000 buffer_time=0.000 print_stall=0
+Stats 43.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2223 bytes_read=5938 bytes_retransmit=0 bytes_invalid=0 send_seq=212 receive_seq=212 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000194  sysload=1.93 cputime=1.538 memavail=3562344 print_time=0.000 buffer_time=0.000 print_stall=0
+Stats 44.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2229 bytes_read=5965 bytes_retransmit=0 bytes_invalid=0 send_seq=213 receive_seq=213 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=1.93 cputime=1.547 memavail=3562344 print_time=0.000 buffer_time=0.000 print_stall=0
+Stats 45.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2235 bytes_read=5981 bytes_retransmit=0 bytes_invalid=0 send_seq=214 receive_seq=214 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=1.86 cputime=1.554 memavail=3562620 print_time=0.000 buffer_time=0.000 print_stall=0
+Stats 46.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2241 bytes_read=5997 bytes_retransmit=0 bytes_invalid=0 send_seq=215 receive_seq=215 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000198  sysload=1.86 cputime=1.562 memavail=3562620 print_time=0.000 buffer_time=0.000 print_stall=0
+Stats 47.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2247 bytes_read=6013 bytes_retransmit=0 bytes_invalid=0 send_seq=216 receive_seq=216 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000199  sysload=1.86 cputime=1.569 memavail=3562620 print_time=0.000 buffer_time=0.000 print_stall=0
+Stats 48.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=2253 bytes_read=6029 bytes_retransmit=0 bytes_invalid=0 send_seq=217 receive_seq=217 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000200  sysload=1.86 cputime=1.577 memavail=3562620 print_time=0.000 buffer_time=0.000 print_stall=0
+Starting SD card print (position 0)
+TMC 'stepper_x' reports GSTAT:      00000001 reset=1(Reset)
+TMC 'stepper_y' reports GSTAT:      00000001 reset=1(Reset)
+Stepper stepper_x phase change (was 0 now 63)
+Stats 96.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=3739 bytes_read=8083 bytes_retransmit=0 bytes_invalid=0 send_seq=336 receive_seq=336 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197 sd_pos=92 sysload=0.94 cputime=2.005 memavail=3543296 print_time=108.038 buffer_time=0.206 print_stall=0
+Stepper stepper_y phase change (was 0 now 63)
+TMC 'stepper_x' reports GSTAT:      00000000
+TMC 'stepper_y' reports GSTAT:      00000000
+Stats 97.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=4150 bytes_read=8441 bytes_retransmit=0 bytes_invalid=0 send_seq=357 receive_seq=357 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=39 upcoming_bytes=0 freq=12000196 sd_pos=92 sysload=0.94 cputime=2.044 memavail=3536292 print_time=110.308 buffer_time=0.000 print_stall=0
+Stats 98.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=4251 bytes_read=8549 bytes_retransmit=0 bytes_invalid=0 send_seq=362 receive_seq=362 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196 sd_pos=92 sysload=0.94 cputime=2.056 memavail=3536292 print_time=110.308 buffer_time=0.000 print_stall=0
+Stats 99.3: gcodein=0  mcu: mcu_awake=0.003 mcu_task_avg=0.000012 mcu_task_stddev=0.000008 bytes_write=4703 bytes_read=8883 bytes_retransmit=0 bytes_invalid=0 send_seq=387 receive_seq=387 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195 sd_pos=92 sysload=0.94 cputime=2.080 memavail=3547476 print_time=111.008 buffer_time=0.000 print_stall=0
+Stats 100.3: gcodein=0  mcu: mcu_awake=0.003 mcu_task_avg=0.000012 mcu_task_stddev=0.000008 bytes_write=5276 bytes_read=9313 bytes_retransmit=0 bytes_invalid=0 send_seq=420 receive_seq=420 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195 sd_pos=92 sysload=0.87 cputime=2.112 memavail=3547484 print_time=112.008 buffer_time=0.000 print_stall=0
+Stats 101.3: gcodein=0  mcu: mcu_awake=0.003 mcu_task_avg=0.000012 mcu_task_stddev=0.000008 bytes_write=5849 bytes_read=9743 bytes_retransmit=0 bytes_invalid=0 send_seq=453 receive_seq=453 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195 sd_pos=92 sysload=0.87 cputime=2.155 memavail=3546756 print_time=113.008 buffer_time=0.000 print_stall=0
+Stats 102.3: gcodein=0  mcu: mcu_awake=0.003 mcu_task_avg=0.000012 mcu_task_stddev=0.000008 bytes_write=6688 bytes_read=10415 bytes_retransmit=0 bytes_invalid=0 send_seq=501 receive_seq=501 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=20 upcoming_bytes=0 freq=12000195 sd_pos=97 sysload=0.87 cputime=2.225 memavail=3546756 print_time=114.330 buffer_time=0.495 print_stall=0
+Stats 103.3: gcodein=0  mcu: mcu_awake=0.003 mcu_task_avg=0.000012 mcu_task_stddev=0.000008 bytes_write=9759 bytes_read=10763 bytes_retransmit=0 bytes_invalid=0 send_seq=554 receive_seq=554 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=40 upcoming_bytes=0 freq=12000196 sd_pos=5847 sysload=0.87 cputime=2.382 memavail=3545764 print_time=116.846 buffer_time=2.011 print_stall=0
+Stats 104.3: gcodein=0  mcu: mcu_awake=0.007 mcu_task_avg=0.000017 mcu_task_stddev=0.000013 bytes_write=14802 bytes_read=11275 bytes_retransmit=0 bytes_invalid=0 send_seq=640 receive_seq=637 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=8 upcoming_bytes=6 freq=12000196 sd_pos=7828 sysload=0.87 cputime=2.493 memavail=3545260 print_time=117.862 buffer_time=2.026 print_stall=0
+Stats 105.3: gcodein=0  mcu: mcu_awake=0.007 mcu_task_avg=0.000017 mcu_task_stddev=0.000013 bytes_write=17818 bytes_read=11628 bytes_retransmit=0 bytes_invalid=0 send_seq=692 receive_seq=691 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=37 upcoming_bytes=1430 freq=12000197 sd_pos=10073 sysload=0.88 cputime=2.612 memavail=3548864 print_time=118.905 buffer_time=2.067 print_stall=0
+Stats 106.3: gcodein=0  mcu: mcu_awake=0.007 mcu_task_avg=0.000017 mcu_task_stddev=0.000013 bytes_write=22630 bytes_read=12121 bytes_retransmit=0 bytes_invalid=0 send_seq=773 receive_seq=773 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=33 upcoming_bytes=1493 freq=12000197 sd_pos=12911 sysload=0.88 cputime=2.737 memavail=3548864 print_time=119.923 buffer_time=2.085 print_stall=0
+Stats 107.3: gcodein=0  mcu: mcu_awake=0.007 mcu_task_avg=0.000017 mcu_task_stddev=0.000013 bytes_write=26998 bytes_read=12569 bytes_retransmit=0 bytes_invalid=0 send_seq=846 receive_seq=846 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=17 upcoming_bytes=1781 freq=12000197 sd_pos=15118 sysload=0.88 cputime=2.854 memavail=3548864 print_time=120.965 buffer_time=2.127 print_stall=0
+Stats 108.3: gcodein=0  mcu: mcu_awake=0.007 mcu_task_avg=0.000017 mcu_task_stddev=0.000013 bytes_write=31820 bytes_read=13057 bytes_retransmit=0 bytes_invalid=0 send_seq=928 receive_seq=927 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=32 upcoming_bytes=1434 freq=12000198 sd_pos=17557 sysload=0.88 cputime=2.977 memavail=3548864 print_time=121.958 buffer_time=2.117 print_stall=0
+Stats 109.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000029 mcu_task_stddev=0.000018 bytes_write=36206 bytes_read=13519 bytes_retransmit=0 bytes_invalid=0 send_seq=1000 receive_seq=1000 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=444 freq=12000198 sd_pos=20649 sysload=0.88 cputime=3.079 memavail=3548384 print_time=122.866 buffer_time=2.024 print_stall=0
+Stats 110.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000029 mcu_task_stddev=0.000018 bytes_write=40700 bytes_read=13977 bytes_retransmit=0 bytes_invalid=0 send_seq=1075 receive_seq=1075 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=35 upcoming_bytes=630 freq=12000196 sd_pos=22797 sysload=0.89 cputime=3.153 memavail=3548384 print_time=123.857 buffer_time=2.014 print_stall=0
+Stats 111.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000029 mcu_task_stddev=0.000018 bytes_write=44533 bytes_read=14380 bytes_retransmit=0 bytes_invalid=0 send_seq=1139 receive_seq=1139 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=58 upcoming_bytes=1367 freq=12000196 sd_pos=25280 sysload=0.89 cputime=3.223 memavail=3546632 print_time=124.893 buffer_time=2.049 print_stall=0
+Stats 112.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000029 mcu_task_stddev=0.000018 bytes_write=49237 bytes_read=14853 bytes_retransmit=0 bytes_invalid=0 send_seq=1217 receive_seq=1217 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=38 upcoming_bytes=1210 freq=12000196 sd_pos=28420 sysload=0.89 cputime=3.299 memavail=3546792 print_time=125.880 buffer_time=2.035 print_stall=0
+Stats 113.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000029 mcu_task_stddev=0.000018 bytes_write=53696 bytes_read=15301 bytes_retransmit=0 bytes_invalid=0 send_seq=1291 receive_seq=1290 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=19 upcoming_bytes=1440 freq=12000196 sd_pos=31020 sysload=0.89 cputime=3.370 memavail=3546648 print_time=126.878 buffer_time=2.032 print_stall=0
+Stats 114.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000017 bytes_write=58321 bytes_read=15788 bytes_retransmit=0 bytes_invalid=0 send_seq=1369 receive_seq=1368 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=31 upcoming_bytes=1578 freq=12000195 sd_pos=33766 sysload=0.89 cputime=3.475 memavail=3546648 print_time=127.853 buffer_time=2.007 print_stall=0
+Stats 115.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000017 bytes_write=63094 bytes_read=16266 bytes_retransmit=0 bytes_invalid=0 send_seq=1448 receive_seq=1447 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=28 upcoming_bytes=1594 freq=12000195 sd_pos=36025 sysload=0.98 cputime=3.608 memavail=3546900 print_time=128.895 buffer_time=2.049 print_stall=0
+Stats 116.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000017 bytes_write=68036 bytes_read=16759 bytes_retransmit=0 bytes_invalid=0 send_seq=1530 receive_seq=1529 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=844 freq=12000194 sd_pos=38848 sysload=0.98 cputime=3.736 memavail=3546900 print_time=129.852 buffer_time=2.005 print_stall=0
+Stats 117.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000017 bytes_write=72546 bytes_read=17222 bytes_retransmit=0 bytes_invalid=0 send_seq=1605 receive_seq=1605 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=46 upcoming_bytes=1297 freq=12000192 sd_pos=41195 sysload=0.98 cputime=3.866 memavail=3546756 print_time=130.911 buffer_time=2.063 print_stall=0
+Stats 118.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000017 bytes_write=76915 bytes_read=17680 bytes_retransmit=0 bytes_invalid=0 send_seq=1680 receive_seq=1680 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=25 upcoming_bytes=1358 freq=12000193 sd_pos=44601 sysload=0.98 cputime=4.001 memavail=3546756 print_time=131.998 buffer_time=2.150 print_stall=0
+Stats 119.3: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=81557 bytes_read=18178 bytes_retransmit=0 bytes_invalid=0 send_seq=1758 receive_seq=1758 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=57 upcoming_bytes=909 freq=12000195 sd_pos=46891 sysload=0.98 cputime=4.128 memavail=3547008 print_time=132.862 buffer_time=2.013 print_stall=0
+Stats 120.3: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=85596 bytes_read=18606 bytes_retransmit=0 bytes_invalid=0 send_seq=1827 receive_seq=1827 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=27 upcoming_bytes=1304 freq=12000193 sd_pos=49535 sysload=0.98 cputime=4.252 memavail=3547008 print_time=133.909 buffer_time=2.059 print_stall=0
+Stats 121.3: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=90486 bytes_read=19089 bytes_retransmit=0 bytes_invalid=0 send_seq=1907 receive_seq=1907 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=20 upcoming_bytes=1174 freq=12000194 sd_pos=52646 sysload=0.98 cputime=4.382 memavail=3547056 print_time=135.008 buffer_time=2.158 print_stall=0
+Stats 122.3: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=94692 bytes_read=19522 bytes_retransmit=0 bytes_invalid=0 send_seq=1977 receive_seq=1977 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=23 upcoming_bytes=977 freq=12000194 sd_pos=54816 sysload=0.98 cputime=4.501 memavail=3546816 print_time=135.907 buffer_time=2.056 print_stall=0
+Stats 123.3: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=98864 bytes_read=19955 bytes_retransmit=0 bytes_invalid=0 send_seq=2048 receive_seq=2047 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=7 upcoming_bytes=1536 freq=12000195 sd_pos=57730 sysload=0.98 cputime=4.629 memavail=3546840 print_time=136.913 buffer_time=2.062 print_stall=0
+Stats 124.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=103379 bytes_read=20432 bytes_retransmit=0 bytes_invalid=0 send_seq=2123 receive_seq=2123 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=30 upcoming_bytes=963 freq=12000196 sd_pos=59971 sysload=0.98 cputime=4.744 memavail=3546844 print_time=137.851 buffer_time=2.000 print_stall=0
+Stats 125.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=108181 bytes_read=20920 bytes_retransmit=0 bytes_invalid=0 send_seq=2204 receive_seq=2204 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=24 upcoming_bytes=1611 freq=12000197 sd_pos=63243 sysload=0.98 cputime=4.893 memavail=3546844 print_time=139.030 buffer_time=2.178 print_stall=0
+Stats 126.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=112184 bytes_read=21343 bytes_retransmit=0 bytes_invalid=0 send_seq=2272 receive_seq=2272 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=47 upcoming_bytes=1682 freq=12000197 sd_pos=65144 sysload=0.98 cputime=5.010 memavail=3546844 print_time=139.879 buffer_time=2.027 print_stall=0
+Stats 127.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=116902 bytes_read=21816 bytes_retransmit=0 bytes_invalid=0 send_seq=2350 receive_seq=2350 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=52 upcoming_bytes=1456 freq=12000197 sd_pos=68078 sysload=0.98 cputime=5.142 memavail=3546852 print_time=140.905 buffer_time=2.052 print_stall=0
+Stats 128.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=121830 bytes_read=22309 bytes_retransmit=0 bytes_invalid=0 send_seq=2432 receive_seq=2432 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=30 upcoming_bytes=1292 freq=12000195 sd_pos=70156 sysload=0.98 cputime=5.267 memavail=3546852 print_time=141.873 buffer_time=2.019 print_stall=0
+Stats 129.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=126278 bytes_read=22776 bytes_retransmit=0 bytes_invalid=0 send_seq=2506 receive_seq=2506 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=27 upcoming_bytes=1870 freq=12000196 sd_pos=73108 sysload=0.98 cputime=5.397 memavail=3546852 print_time=142.915 buffer_time=2.060 print_stall=0
+Stats 130.3: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=131122 bytes_read=23259 bytes_retransmit=0 bytes_invalid=0 send_seq=2586 receive_seq=2586 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=56 upcoming_bytes=1216 freq=12000197 sd_pos=75303 sysload=0.98 cputime=5.520 memavail=3546860 print_time=143.879 buffer_time=2.024 print_stall=0
+Stats 131.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=135929 bytes_read=23742 bytes_retransmit=0 bytes_invalid=0 send_seq=2666 receive_seq=2666 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=49 upcoming_bytes=898 freq=12000197 sd_pos=78614 sysload=0.98 cputime=5.653 memavail=3545864 print_time=144.868 buffer_time=2.012 print_stall=0
+Stats 132.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=140107 bytes_read=24170 bytes_retransmit=0 bytes_invalid=0 send_seq=2735 receive_seq=2735 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=48 upcoming_bytes=2285 freq=12000198 sd_pos=82198 sysload=0.98 cputime=5.787 memavail=3545864 print_time=146.149 buffer_time=2.292 print_stall=0
+Stats 133.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=144696 bytes_read=24633 bytes_retransmit=0 bytes_invalid=0 send_seq=2811 receive_seq=2811 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=47 upcoming_bytes=1549 freq=12000198 sd_pos=84281 sysload=0.98 cputime=5.894 memavail=3545864 print_time=146.962 buffer_time=2.105 print_stall=0
+Stats 134.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=149059 bytes_read=25090 bytes_retransmit=0 bytes_invalid=0 send_seq=2884 receive_seq=2883 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=24 upcoming_bytes=1626 freq=12000199 sd_pos=86847 sysload=0.98 cputime=6.012 memavail=3545864 print_time=147.883 buffer_time=2.026 print_stall=0
+Stats 135.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=153773 bytes_read=25573 bytes_retransmit=0 bytes_invalid=0 send_seq=2963 receive_seq=2963 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=26 upcoming_bytes=2207 freq=12000199 sd_pos=90166 sysload=0.90 cputime=6.146 memavail=3545864 print_time=149.014 buffer_time=2.157 print_stall=0
+Stats 136.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=158472 bytes_read=26046 bytes_retransmit=0 bytes_invalid=0 send_seq=3041 receive_seq=3041 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=1931 freq=12000199 sd_pos=92592 sysload=0.90 cputime=6.266 memavail=3545876 print_time=149.915 buffer_time=2.057 print_stall=0
+Stats 137.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=163359 bytes_read=26534 bytes_retransmit=0 bytes_invalid=0 send_seq=3122 receive_seq=3122 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=29 upcoming_bytes=1536 freq=12000199 sd_pos=94709 sysload=0.90 cputime=6.392 memavail=3545876 print_time=150.888 buffer_time=2.030 print_stall=0
+Stats 138.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=168297 bytes_read=27027 bytes_retransmit=0 bytes_invalid=0 send_seq=3204 receive_seq=3204 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=12 upcoming_bytes=1310 freq=12000199 sd_pos=96898 sysload=0.90 cputime=6.521 memavail=3545876 print_time=151.888 buffer_time=2.030 print_stall=0
+Stats 139.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=172819 bytes_read=27499 bytes_retransmit=0 bytes_invalid=0 send_seq=3279 receive_seq=3279 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=32 upcoming_bytes=1557 freq=12000199 sd_pos=99629 sysload=0.90 cputime=6.619 memavail=3545876 print_time=152.892 buffer_time=2.032 print_stall=0
+Stats 140.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=177505 bytes_read=27972 bytes_retransmit=0 bytes_invalid=0 send_seq=3357 receive_seq=3357 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=31 upcoming_bytes=1096 freq=12000199 sd_pos=102152 sysload=0.83 cputime=6.688 memavail=3545876 print_time=153.861 buffer_time=2.001 print_stall=0
+Stats 141.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=182151 bytes_read=28440 bytes_retransmit=0 bytes_invalid=0 send_seq=3434 receive_seq=3434 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=1230 freq=12000199 sd_pos=104846 sysload=0.83 cputime=6.762 memavail=3545384 print_time=154.898 buffer_time=2.038 print_stall=0
+Stats 142.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=186660 bytes_read=28888 bytes_retransmit=0 bytes_invalid=0 send_seq=3508 receive_seq=3507 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=30 upcoming_bytes=948 freq=12000200 sd_pos=107046 sysload=0.83 cputime=6.831 memavail=3545144 print_time=155.901 buffer_time=2.039 print_stall=0
+Stats 143.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=191339 bytes_read=29361 bytes_retransmit=0 bytes_invalid=0 send_seq=3586 receive_seq=3585 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=20 upcoming_bytes=1350 freq=12000199 sd_pos=110063 sysload=0.83 cputime=6.908 memavail=3544896 print_time=156.994 buffer_time=2.132 print_stall=0
+Stats 144.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=195437 bytes_read=29798 bytes_retransmit=0 bytes_invalid=0 send_seq=3654 receive_seq=3653 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=1767 freq=12000200 sd_pos=112896 sysload=0.83 cputime=7.026 memavail=3545148 print_time=157.922 buffer_time=2.058 print_stall=0
+Stats 145.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=200041 bytes_read=30266 bytes_retransmit=0 bytes_invalid=0 send_seq=3731 receive_seq=3730 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=28 upcoming_bytes=1892 freq=12000200 sd_pos=115527 sysload=0.76 cputime=7.157 memavail=3544908 print_time=158.898 buffer_time=2.033 print_stall=0
+Stats 146.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=204920 bytes_read=30754 bytes_retransmit=0 bytes_invalid=0 send_seq=3811 receive_seq=3811 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=55 upcoming_bytes=1719 freq=12000200 sd_pos=117869 sysload=0.76 cputime=7.291 memavail=3544660 print_time=159.872 buffer_time=2.007 print_stall=0
+Stats 147.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=209830 bytes_read=31252 bytes_retransmit=0 bytes_invalid=0 send_seq=3894 receive_seq=3894 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=52 upcoming_bytes=1127 freq=12000200 sd_pos=120798 sysload=0.76 cputime=7.418 memavail=3543404 print_time=160.873 buffer_time=2.007 print_stall=0
+Stats 148.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=214652 bytes_read=31730 bytes_retransmit=0 bytes_invalid=0 send_seq=3973 receive_seq=3973 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=46 upcoming_bytes=703 freq=12000200 sd_pos=123523 sysload=0.76 cputime=7.550 memavail=3543404 print_time=161.874 buffer_time=2.007 print_stall=0
+Stats 149.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=219009 bytes_read=32192 bytes_retransmit=0 bytes_invalid=0 send_seq=4046 receive_seq=4046 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=33 upcoming_bytes=792 freq=12000200 sd_pos=126237 sysload=0.76 cputime=7.676 memavail=3543420 print_time=162.910 buffer_time=2.041 print_stall=0
+Stats 150.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=223388 bytes_read=32645 bytes_retransmit=0 bytes_invalid=0 send_seq=4120 receive_seq=4120 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=57 upcoming_bytes=2117 freq=12000200 sd_pos=129579 sysload=0.78 cputime=7.818 memavail=3543420 print_time=164.124 buffer_time=2.249 print_stall=0
+Stats 151.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=227653 bytes_read=33078 bytes_retransmit=0 bytes_invalid=0 send_seq=4191 receive_seq=4190 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=27 upcoming_bytes=1467 freq=12000201 sd_pos=131744 sysload=0.78 cputime=7.926 memavail=3543216 print_time=164.917 buffer_time=2.042 print_stall=0
+Stats 152.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=232406 bytes_read=33561 bytes_retransmit=0 bytes_invalid=0 send_seq=4271 receive_seq=4270 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=30 upcoming_bytes=804 freq=12000201 sd_pos=134210 sysload=0.78 cputime=8.046 memavail=3543216 print_time=165.920 buffer_time=2.044 print_stall=0
+Stats 153.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=236963 bytes_read=34024 bytes_retransmit=0 bytes_invalid=0 send_seq=4346 receive_seq=4346 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=25 upcoming_bytes=818 freq=12000201 sd_pos=136846 sysload=0.78 cputime=8.170 memavail=3543492 print_time=166.900 buffer_time=2.023 print_stall=0
+Stats 154.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=241019 bytes_read=34451 bytes_retransmit=0 bytes_invalid=0 send_seq=4413 receive_seq=4412 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=1945 freq=12000201 sd_pos=140228 sysload=0.78 cputime=8.304 memavail=3543500 print_time=168.014 buffer_time=2.135 print_stall=0
+Stats 155.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=245641 bytes_read=34924 bytes_retransmit=0 bytes_invalid=0 send_seq=4490 receive_seq=4490 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=51 upcoming_bytes=1542 freq=12000201 sd_pos=142582 sysload=0.80 cputime=8.426 memavail=3543500 print_time=168.904 buffer_time=2.025 print_stall=0
+Stats 156.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=250381 bytes_read=35402 bytes_retransmit=0 bytes_invalid=0 send_seq=4569 receive_seq=4569 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=51 upcoming_bytes=1406 freq=12000201 sd_pos=145200 sysload=0.80 cputime=8.552 memavail=3543500 print_time=169.894 buffer_time=2.014 print_stall=0
+Stats 157.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=255133 bytes_read=35880 bytes_retransmit=0 bytes_invalid=0 send_seq=4648 receive_seq=4648 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=30 upcoming_bytes=1493 freq=12000202 sd_pos=148293 sysload=0.80 cputime=8.692 memavail=3543504 print_time=171.033 buffer_time=2.152 print_stall=0
+Stats 158.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=259621 bytes_read=36338 bytes_retransmit=0 bytes_invalid=0 send_seq=4723 receive_seq=4723 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=29 upcoming_bytes=1085 freq=12000200 sd_pos=150494 sysload=0.80 cputime=8.805 memavail=3543504 print_time=171.896 buffer_time=2.014 print_stall=0
+Stats 159.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=263981 bytes_read=36800 bytes_retransmit=0 bytes_invalid=0 send_seq=4796 receive_seq=4796 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=35 upcoming_bytes=1366 freq=12000201 sd_pos=153023 sysload=0.80 cputime=8.938 memavail=3545148 print_time=172.954 buffer_time=2.072 print_stall=0
+Stats 160.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=268631 bytes_read=37263 bytes_retransmit=0 bytes_invalid=0 send_seq=4873 receive_seq=4872 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=14 upcoming_bytes=1216 freq=12000201 sd_pos=155729 sysload=0.74 cputime=9.057 memavail=3545280 print_time=173.918 buffer_time=2.036 print_stall=0
+Stats 161.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=272954 bytes_read=37711 bytes_retransmit=0 bytes_invalid=0 send_seq=4945 receive_seq=4945 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=44 upcoming_bytes=1412 freq=12000201 sd_pos=158298 sysload=0.74 cputime=9.182 memavail=3544808 print_time=174.904 buffer_time=2.020 print_stall=0
+Stats 162.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=277645 bytes_read=38184 bytes_retransmit=0 bytes_invalid=0 send_seq=5023 receive_seq=5023 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=7 upcoming_bytes=1338 freq=12000201 sd_pos=160623 sysload=0.74 cputime=9.303 memavail=3544576 print_time=175.892 buffer_time=2.009 print_stall=0
+Stats 163.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=282350 bytes_read=38657 bytes_retransmit=0 bytes_invalid=0 send_seq=5101 receive_seq=5101 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=37 upcoming_bytes=1789 freq=12000201 sd_pos=163861 sysload=0.74 cputime=9.448 memavail=3544728 print_time=177.030 buffer_time=2.145 print_stall=0
+Stats 164.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=287007 bytes_read=39139 bytes_retransmit=0 bytes_invalid=0 send_seq=5178 receive_seq=5178 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=20 upcoming_bytes=1372 freq=12000201 sd_pos=166513 sysload=0.74 cputime=9.571 memavail=3544828 print_time=178.049 buffer_time=2.157 print_stall=0
+Stats 165.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=291586 bytes_read=39602 bytes_retransmit=0 bytes_invalid=0 send_seq=5254 receive_seq=5254 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=58 upcoming_bytes=694 freq=12000201 sd_pos=168975 sysload=0.76 cputime=9.684 memavail=3544580 print_time=178.935 buffer_time=2.043 print_stall=0
+Stats 166.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=295715 bytes_read=40030 bytes_retransmit=0 bytes_invalid=0 send_seq=5323 receive_seq=5323 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=48 upcoming_bytes=1502 freq=12000201 sd_pos=171913 sysload=0.76 cputime=9.811 memavail=3544592 print_time=180.014 buffer_time=2.121 print_stall=0
+Stats 167.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=300022 bytes_read=40478 bytes_retransmit=0 bytes_invalid=0 send_seq=5396 receive_seq=5396 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=42 upcoming_bytes=1413 freq=12000200 sd_pos=174677 sysload=0.76 cputime=9.922 memavail=3544744 print_time=180.961 buffer_time=2.068 print_stall=0
+Stats 168.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=304695 bytes_read=40941 bytes_retransmit=0 bytes_invalid=0 send_seq=5473 receive_seq=5472 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=13 upcoming_bytes=1386 freq=12000198 sd_pos=177207 sysload=0.76 cputime=10.050 memavail=3544844 print_time=181.912 buffer_time=2.019 print_stall=0
+Stats 169.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000016 bytes_write=309192 bytes_read=41423 bytes_retransmit=0 bytes_invalid=0 send_seq=5549 receive_seq=5549 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=1592 freq=12000197 sd_pos=179645 sysload=0.76 cputime=10.171 memavail=3544844 print_time=182.901 buffer_time=2.007 print_stall=0
+Stats 170.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000016 bytes_write=314066 bytes_read=41911 bytes_retransmit=0 bytes_invalid=0 send_seq=5630 receive_seq=5630 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=43 upcoming_bytes=1266 freq=12000197 sd_pos=182419 sysload=0.78 cputime=10.298 memavail=3544608 print_time=183.920 buffer_time=2.025 print_stall=0
+Stats 171.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000016 bytes_write=318850 bytes_read=42394 bytes_retransmit=0 bytes_invalid=0 send_seq=5710 receive_seq=5710 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=53 upcoming_bytes=786 freq=12000197 sd_pos=184480 sysload=0.78 cputime=10.415 memavail=3544104 print_time=184.899 buffer_time=2.004 print_stall=0
+Stats 172.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000016 bytes_write=323350 bytes_read=42857 bytes_retransmit=0 bytes_invalid=0 send_seq=5786 receive_seq=5786 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=30 upcoming_bytes=720 freq=12000197 sd_pos=186815 sysload=0.78 cputime=10.530 memavail=3544120 print_time=185.936 buffer_time=2.040 print_stall=0
+Stats 173.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000016 bytes_write=327690 bytes_read=43305 bytes_retransmit=0 bytes_invalid=0 send_seq=5859 receive_seq=5859 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=31 upcoming_bytes=812 freq=12000197 sd_pos=189685 sysload=0.78 cputime=10.652 memavail=3544120 print_time=186.957 buffer_time=2.059 print_stall=0
+Stats 174.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000016 bytes_write=331883 bytes_read=43752 bytes_retransmit=0 bytes_invalid=0 send_seq=5929 receive_seq=5929 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=6 upcoming_bytes=902 freq=12000198 sd_pos=192061 sysload=0.78 cputime=10.765 memavail=3543872 print_time=187.938 buffer_time=2.039 print_stall=0
+Stats 175.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000016 bytes_write=336173 bytes_read=44195 bytes_retransmit=0 bytes_invalid=0 send_seq=6001 receive_seq=6001 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=42 upcoming_bytes=958 freq=12000198 sd_pos=194642 sysload=0.72 cputime=10.888 memavail=3543636 print_time=188.903 buffer_time=2.003 print_stall=0
+Stats 176.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000016 bytes_write=340576 bytes_read=44648 bytes_retransmit=0 bytes_invalid=0 send_seq=6075 receive_seq=6075 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=55 upcoming_bytes=1319 freq=12000198 sd_pos=197175 sysload=0.72 cputime=11.014 memavail=3543636 print_time=189.942 buffer_time=2.041 print_stall=0
+Stats 177.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000016 bytes_write=345273 bytes_read=45111 bytes_retransmit=0 bytes_invalid=0 send_seq=6152 receive_seq=6151 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=1718 freq=12000198 sd_pos=200346 sysload=0.72 cputime=11.152 memavail=3543636 print_time=191.095 buffer_time=2.192 print_stall=0
+Stats 178.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000016 bytes_write=349710 bytes_read=45569 bytes_retransmit=0 bytes_invalid=0 send_seq=6226 receive_seq=6226 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=30 upcoming_bytes=664 freq=12000197 sd_pos=202093 sysload=0.72 cputime=11.262 memavail=3543636 print_time=191.903 buffer_time=2.000 print_stall=0
+Stats 179.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=354122 bytes_read=46031 bytes_retransmit=0 bytes_invalid=0 send_seq=6300 receive_seq=6299 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=24 upcoming_bytes=784 freq=12000195 sd_pos=204982 sysload=0.72 cputime=11.388 memavail=3543396 print_time=192.951 buffer_time=2.047 print_stall=0
+Stats 180.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=358334 bytes_read=46485 bytes_retransmit=0 bytes_invalid=0 send_seq=6371 receive_seq=6371 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=38 upcoming_bytes=1284 freq=12000196 sd_pos=207410 sysload=0.74 cputime=11.514 memavail=3543396 print_time=194.036 buffer_time=2.130 print_stall=0
+Stats 181.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=361632 bytes_read=46843 bytes_retransmit=0 bytes_invalid=0 send_seq=6426 receive_seq=6426 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195 sd_pos=210966 sysload=0.74 cputime=11.644 memavail=3542552 print_time=195.117 buffer_time=2.210 print_stall=0
+Finished SD card print
+Exiting SD card print (position 211084)
+Stats 182.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=362039 bytes_read=46976 bytes_retransmit=0 bytes_invalid=0 send_seq=6436 receive_seq=6436 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.74 cputime=11.660 memavail=3539408 print_time=195.182 buffer_time=1.275 print_stall=0
+Stats 183.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=362523 bytes_read=47114 bytes_retransmit=0 bytes_invalid=0 send_seq=6447 receive_seq=6447 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.74 cputime=11.676 memavail=3539408 print_time=195.895 buffer_time=0.988 print_stall=0
+Stats 184.4: gcodein=0  mcu: mcu_awake=0.009 mcu_task_avg=0.000027 mcu_task_stddev=0.000018 bytes_write=362694 bytes_read=47246 bytes_retransmit=0 bytes_invalid=0 send_seq=6454 receive_seq=6454 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.74 cputime=11.689 memavail=3545348 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 185.4: gcodein=0  mcu: mcu_awake=0.009 mcu_task_avg=0.000027 mcu_task_stddev=0.000018 bytes_write=362756 bytes_read=47354 bytes_retransmit=0 bytes_invalid=0 send_seq=6459 receive_seq=6459 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.68 cputime=11.702 memavail=3545480 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 186.4: gcodein=0  mcu: mcu_awake=0.009 mcu_task_avg=0.000027 mcu_task_stddev=0.000018 bytes_write=362818 bytes_read=47462 bytes_retransmit=0 bytes_invalid=0 send_seq=6464 receive_seq=6464 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.68 cputime=11.715 memavail=3545480 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 187.4: gcodein=0  mcu: mcu_awake=0.009 mcu_task_avg=0.000027 mcu_task_stddev=0.000018 bytes_write=362880 bytes_read=47570 bytes_retransmit=0 bytes_invalid=0 send_seq=6469 receive_seq=6469 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.68 cputime=11.734 memavail=3545716 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 188.4: gcodein=0  mcu: mcu_awake=0.009 mcu_task_avg=0.000027 mcu_task_stddev=0.000018 bytes_write=362942 bytes_read=47678 bytes_retransmit=0 bytes_invalid=0 send_seq=6474 receive_seq=6474 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.68 cputime=11.753 memavail=3546012 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 189.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000009 mcu_task_stddev=0.000008 bytes_write=363004 bytes_read=47798 bytes_retransmit=0 bytes_invalid=0 send_seq=6479 receive_seq=6479 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.68 cputime=11.772 memavail=3546012 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 190.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000009 mcu_task_stddev=0.000008 bytes_write=363066 bytes_read=47906 bytes_retransmit=0 bytes_invalid=0 send_seq=6484 receive_seq=6484 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.62 cputime=11.791 memavail=3546012 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 191.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000009 mcu_task_stddev=0.000008 bytes_write=363128 bytes_read=48014 bytes_retransmit=0 bytes_invalid=0 send_seq=6489 receive_seq=6489 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.62 cputime=11.811 memavail=3546012 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 192.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000009 mcu_task_stddev=0.000008 bytes_write=363190 bytes_read=48122 bytes_retransmit=0 bytes_invalid=0 send_seq=6494 receive_seq=6494 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.62 cputime=11.830 memavail=3546024 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 193.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000009 mcu_task_stddev=0.000008 bytes_write=363252 bytes_read=48230 bytes_retransmit=0 bytes_invalid=0 send_seq=6499 receive_seq=6499 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.62 cputime=11.848 memavail=3545964 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 194.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363314 bytes_read=48349 bytes_retransmit=0 bytes_invalid=0 send_seq=6504 receive_seq=6504 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.62 cputime=11.868 memavail=3546052 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 195.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363376 bytes_read=48457 bytes_retransmit=0 bytes_invalid=0 send_seq=6509 receive_seq=6509 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.57 cputime=11.888 memavail=3546052 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 196.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363438 bytes_read=48565 bytes_retransmit=0 bytes_invalid=0 send_seq=6514 receive_seq=6514 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.57 cputime=11.907 memavail=3546052 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 197.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363500 bytes_read=48673 bytes_retransmit=0 bytes_invalid=0 send_seq=6519 receive_seq=6519 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.57 cputime=11.926 memavail=3546052 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 198.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363562 bytes_read=48781 bytes_retransmit=0 bytes_invalid=0 send_seq=6524 receive_seq=6524 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.57 cputime=11.946 memavail=3546052 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 199.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363624 bytes_read=48900 bytes_retransmit=0 bytes_invalid=0 send_seq=6529 receive_seq=6529 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.57 cputime=11.966 memavail=3546052 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 200.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363686 bytes_read=49008 bytes_retransmit=0 bytes_invalid=0 send_seq=6534 receive_seq=6534 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.61 cputime=11.985 memavail=3546052 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 201.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363748 bytes_read=49116 bytes_retransmit=0 bytes_invalid=0 send_seq=6539 receive_seq=6539 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.61 cputime=12.005 memavail=3546692 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 202.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363810 bytes_read=49224 bytes_retransmit=0 bytes_invalid=0 send_seq=6544 receive_seq=6544 retransmit_seq=0 srtt=0.001 rttvar=0.001 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.61 cputime=12.024 memavail=3546624 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 203.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363872 bytes_read=49332 bytes_retransmit=0 bytes_invalid=0 send_seq=6549 receive_seq=6549 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.61 cputime=12.044 memavail=3546624 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 204.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363934 bytes_read=49452 bytes_retransmit=0 bytes_invalid=0 send_seq=6554 receive_seq=6554 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.61 cputime=12.063 memavail=3543096 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 205.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=363996 bytes_read=49560 bytes_retransmit=0 bytes_invalid=0 send_seq=6559 receive_seq=6559 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.64 cputime=12.076 memavail=3541844 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 206.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=364058 bytes_read=49668 bytes_retransmit=0 bytes_invalid=0 send_seq=6564 receive_seq=6564 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.64 cputime=12.089 memavail=3535296 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 207.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=364120 bytes_read=49776 bytes_retransmit=0 bytes_invalid=0 send_seq=6569 receive_seq=6569 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.64 cputime=12.100 memavail=3535296 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 208.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=364182 bytes_read=49884 bytes_retransmit=0 bytes_invalid=0 send_seq=6574 receive_seq=6574 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.64 cputime=12.111 memavail=3535296 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 209.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=364244 bytes_read=50003 bytes_retransmit=0 bytes_invalid=0 send_seq=6579 receive_seq=6579 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.64 cputime=12.122 memavail=3535296 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 210.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=364306 bytes_read=50111 bytes_retransmit=0 bytes_invalid=0 send_seq=6584 receive_seq=6584 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.59 cputime=12.138 memavail=3542456 print_time=195.895 buffer_time=0.000 print_stall=0
+Stats 211.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=364368 bytes_read=50219 bytes_retransmit=0 bytes_invalid=0 send_seq=6589 receive_seq=6589 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.59 cputime=12.149 memavail=3535964 print_time=195.895 buffer_time=0.000 print_stall=0
+Starting SD card print (position 0)
+Stats 212.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=365159 bytes_read=50861 bytes_retransmit=0 bytes_invalid=0 send_seq=6628 receive_seq=6628 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=39 upcoming_bytes=0 freq=12000193 sd_pos=92 sysload=0.59 cputime=12.228 memavail=3532528 print_time=225.898 buffer_time=0.000 print_stall=0
+Stats 213.4: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=365260 bytes_read=50969 bytes_retransmit=0 bytes_invalid=0 send_seq=6633 receive_seq=6633 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000193 sd_pos=92 sysload=0.59 cputime=12.241 memavail=3530416 print_time=225.898 buffer_time=0.000 print_stall=0
+Stats 214.4: gcodein=0  mcu: mcu_awake=0.002 mcu_task_avg=0.000011 mcu_task_stddev=0.000008 bytes_write=365443 bytes_read=51125 bytes_retransmit=0 bytes_invalid=0 send_seq=6642 receive_seq=6642 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000193 sd_pos=92 sysload=0.59 cputime=12.255 memavail=3541688 print_time=226.098 buffer_time=0.000 print_stall=0
+Stats 215.4: gcodein=0  mcu: mcu_awake=0.002 mcu_task_avg=0.000011 mcu_task_stddev=0.000008 bytes_write=366031 bytes_read=51570 bytes_retransmit=0 bytes_invalid=0 send_seq=6678 receive_seq=6678 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000193 sd_pos=92 sysload=0.54 cputime=12.293 memavail=3541688 print_time=227.098 buffer_time=0.000 print_stall=0
+Stats 216.4: gcodein=0  mcu: mcu_awake=0.002 mcu_task_avg=0.000011 mcu_task_stddev=0.000008 bytes_write=366631 bytes_read=52034 bytes_retransmit=0 bytes_invalid=0 send_seq=6715 receive_seq=6715 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000193 sd_pos=92 sysload=0.54 cputime=12.338 memavail=3541688 print_time=228.098 buffer_time=0.000 print_stall=0
+Stats 217.4: gcodein=0  mcu: mcu_awake=0.002 mcu_task_avg=0.000011 mcu_task_stddev=0.000008 bytes_write=367219 bytes_read=52479 bytes_retransmit=0 bytes_invalid=0 send_seq=6751 receive_seq=6751 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000193 sd_pos=92 sysload=0.54 cputime=12.381 memavail=3541688 print_time=229.098 buffer_time=0.000 print_stall=0
+Stats 218.4: gcodein=0  mcu: mcu_awake=0.002 mcu_task_avg=0.000011 mcu_task_stddev=0.000008 bytes_write=369020 bytes_read=53112 bytes_retransmit=0 bytes_invalid=0 send_seq=6808 receive_seq=6808 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=36 upcoming_bytes=0 freq=12000193 sd_pos=4472 sysload=0.54 cputime=12.536 memavail=3540192 print_time=231.984 buffer_time=2.048 print_stall=0
+Stats 219.4: gcodein=0  mcu: mcu_awake=0.006 mcu_task_avg=0.000016 mcu_task_stddev=0.000011 bytes_write=373149 bytes_read=53559 bytes_retransmit=0 bytes_invalid=0 send_seq=6878 receive_seq=6878 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=32 upcoming_bytes=0 freq=12000193 sd_pos=6737 sysload=0.54 cputime=12.599 memavail=3537952 print_time=232.939 buffer_time=2.002 print_stall=0
+Stats 220.4: gcodein=0  mcu: mcu_awake=0.006 mcu_task_avg=0.000016 mcu_task_stddev=0.000011 bytes_write=376854 bytes_read=53962 bytes_retransmit=0 bytes_invalid=0 send_seq=6942 receive_seq=6942 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=41 upcoming_bytes=1395 freq=12000192 sd_pos=8989 sysload=0.58 cputime=12.663 memavail=3539584 print_time=234.023 buffer_time=2.086 print_stall=0
+Stats 221.4: gcodein=0  mcu: mcu_awake=0.006 mcu_task_avg=0.000016 mcu_task_stddev=0.000011 bytes_write=381222 bytes_read=54420 bytes_retransmit=0 bytes_invalid=0 send_seq=7017 receive_seq=7017 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=42 upcoming_bytes=1441 freq=12000190 sd_pos=11390 sysload=0.58 cputime=12.731 memavail=3543800 print_time=234.984 buffer_time=2.046 print_stall=0
+Stats 222.4: gcodein=0  mcu: mcu_awake=0.006 mcu_task_avg=0.000016 mcu_task_stddev=0.000011 bytes_write=385995 bytes_read=54898 bytes_retransmit=0 bytes_invalid=0 send_seq=7097 receive_seq=7096 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=21 upcoming_bytes=1296 freq=12000191 sd_pos=13746 sysload=0.58 cputime=12.800 memavail=3543564 print_time=235.977 buffer_time=2.039 print_stall=0
+Stats 223.4: gcodein=0  mcu: mcu_awake=0.006 mcu_task_avg=0.000016 mcu_task_stddev=0.000011 bytes_write=390499 bytes_read=55366 bytes_retransmit=0 bytes_invalid=0 send_seq=7173 receive_seq=7173 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=24 upcoming_bytes=1234 freq=12000191 sd_pos=16003 sysload=0.58 cputime=12.887 memavail=3543572 print_time=236.945 buffer_time=2.007 print_stall=0
+Stats 224.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000029 mcu_task_stddev=0.000018 bytes_write=395207 bytes_read=55848 bytes_retransmit=0 bytes_invalid=0 send_seq=7251 receive_seq=7250 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=7 upcoming_bytes=2309 freq=12000192 sd_pos=20546 sysload=0.58 cputime=13.040 memavail=3543572 print_time=238.412 buffer_time=2.473 print_stall=0
+Stats 225.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000029 mcu_task_stddev=0.000018 bytes_write=399738 bytes_read=56311 bytes_retransmit=0 bytes_invalid=0 send_seq=7327 receive_seq=7326 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=30 upcoming_bytes=305 freq=12000190 sd_pos=21651 sysload=0.61 cputime=13.095 memavail=3543572 print_time=238.970 buffer_time=2.030 print_stall=0
+Stats 226.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000029 mcu_task_stddev=0.000018 bytes_write=404169 bytes_read=56759 bytes_retransmit=0 bytes_invalid=0 send_seq=7400 receive_seq=7399 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=14 upcoming_bytes=355 freq=12000189 sd_pos=23795 sysload=0.61 cputime=13.166 memavail=3543332 print_time=239.947 buffer_time=2.007 print_stall=0
+Stats 227.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000029 mcu_task_stddev=0.000018 bytes_write=407953 bytes_read=57157 bytes_retransmit=0 bytes_invalid=0 send_seq=7463 receive_seq=7462 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=13 upcoming_bytes=1070 freq=12000190 sd_pos=26617 sysload=0.61 cputime=13.234 memavail=3543584 print_time=240.940 buffer_time=1.999 print_stall=0
+Stats 228.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000029 mcu_task_stddev=0.000018 bytes_write=412435 bytes_read=57615 bytes_retransmit=0 bytes_invalid=0 send_seq=7538 receive_seq=7537 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=1590 freq=12000189 sd_pos=29968 sysload=0.61 cputime=13.308 memavail=3543596 print_time=242.040 buffer_time=2.100 print_stall=0
+Stats 229.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=416860 bytes_read=58092 bytes_retransmit=0 bytes_invalid=0 send_seq=7613 receive_seq=7613 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=30 upcoming_bytes=1631 freq=12000189 sd_pos=32444 sysload=0.61 cputime=13.389 memavail=3543596 print_time=242.941 buffer_time=2.000 print_stall=0
+Stats 230.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=421617 bytes_read=58570 bytes_retransmit=0 bytes_invalid=0 send_seq=7692 receive_seq=7692 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=47 upcoming_bytes=1605 freq=12000190 sd_pos=34978 sysload=0.56 cputime=13.525 memavail=3543356 print_time=243.963 buffer_time=2.021 print_stall=0
+Stats 231.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=426613 bytes_read=59068 bytes_retransmit=0 bytes_invalid=0 send_seq=7775 receive_seq=7775 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=48 upcoming_bytes=1902 freq=12000189 sd_pos=38158 sysload=0.56 cputime=13.660 memavail=3543652 print_time=245.171 buffer_time=2.228 print_stall=0
+Stats 232.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=431242 bytes_read=59546 bytes_retransmit=0 bytes_invalid=0 send_seq=7854 receive_seq=7854 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=29 upcoming_bytes=1061 freq=12000190 sd_pos=39689 sysload=0.56 cputime=13.768 memavail=3543652 print_time=245.953 buffer_time=2.009 print_stall=0
+Stats 233.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=435705 bytes_read=59994 bytes_retransmit=0 bytes_invalid=0 send_seq=7927 receive_seq=7927 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=55 upcoming_bytes=1840 freq=12000189 sd_pos=43203 sysload=0.56 cputime=13.916 memavail=3543668 print_time=247.187 buffer_time=2.243 print_stall=0
+Stats 234.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=440227 bytes_read=60466 bytes_retransmit=0 bytes_invalid=0 send_seq=8002 receive_seq=8002 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=43 upcoming_bytes=837 freq=12000190 sd_pos=45568 sysload=0.56 cputime=14.033 memavail=3543428 print_time=247.970 buffer_time=2.024 print_stall=0
+Stats 235.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=444552 bytes_read=60914 bytes_retransmit=0 bytes_invalid=0 send_seq=8075 receive_seq=8075 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=21 upcoming_bytes=1218 freq=12000190 sd_pos=47874 sysload=0.68 cputime=14.153 memavail=3543428 print_time=248.959 buffer_time=2.013 print_stall=0
+Stats 236.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=449045 bytes_read=61367 bytes_retransmit=0 bytes_invalid=0 send_seq=8149 receive_seq=8149 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=24 upcoming_bytes=569 freq=12000189 sd_pos=50563 sysload=0.68 cputime=14.273 memavail=3543188 print_time=249.958 buffer_time=2.010 print_stall=0
+Stats 237.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=453593 bytes_read=61830 bytes_retransmit=0 bytes_invalid=0 send_seq=8225 receive_seq=8225 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=40 upcoming_bytes=820 freq=12000190 sd_pos=53716 sysload=0.68 cputime=14.402 memavail=3543188 print_time=250.973 buffer_time=2.025 print_stall=0
+Stats 238.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=457547 bytes_read=62243 bytes_retransmit=0 bytes_invalid=0 send_seq=8291 receive_seq=8291 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=14 upcoming_bytes=1486 freq=12000192 sd_pos=56572 sysload=0.68 cputime=14.529 memavail=3542936 print_time=252.010 buffer_time=2.061 print_stall=0
+Stats 239.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000030 mcu_task_stddev=0.000017 bytes_write=462349 bytes_read=62740 bytes_retransmit=0 bytes_invalid=0 send_seq=8372 receive_seq=8371 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=21 upcoming_bytes=1150 freq=12000192 sd_pos=58876 sysload=0.68 cputime=14.660 memavail=3542936 print_time=253.000 buffer_time=2.051 print_stall=0
+Stats 240.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000030 mcu_task_stddev=0.000017 bytes_write=466819 bytes_read=63203 bytes_retransmit=0 bytes_invalid=0 send_seq=8448 receive_seq=8447 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=6 upcoming_bytes=1040 freq=12000192 sd_pos=61269 sysload=0.70 cputime=14.784 memavail=3542700 print_time=253.987 buffer_time=2.037 print_stall=0
+Stats 241.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000030 mcu_task_stddev=0.000017 bytes_write=471225 bytes_read=63662 bytes_retransmit=0 bytes_invalid=0 send_seq=8520 receive_seq=8520 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=51 upcoming_bytes=1355 freq=12000192 sd_pos=63983 sysload=0.70 cputime=14.911 memavail=3542476 print_time=254.995 buffer_time=2.045 print_stall=0
+Stats 242.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000030 mcu_task_stddev=0.000017 bytes_write=475561 bytes_read=64105 bytes_retransmit=0 bytes_invalid=0 send_seq=8592 receive_seq=8592 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=48 upcoming_bytes=1581 freq=12000193 sd_pos=66712 sysload=0.70 cputime=15.036 memavail=3542476 print_time=256.005 buffer_time=2.054 print_stall=0
+Stats 243.4: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000030 mcu_task_stddev=0.000017 bytes_write=480442 bytes_read=64598 bytes_retransmit=0 bytes_invalid=0 send_seq=8674 receive_seq=8674 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=34 upcoming_bytes=1376 freq=12000191 sd_pos=68896 sysload=0.70 cputime=15.168 memavail=3542476 print_time=256.988 buffer_time=2.036 print_stall=0
+Stats 244.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=485048 bytes_read=65075 bytes_retransmit=0 bytes_invalid=0 send_seq=8751 receive_seq=8750 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=1684 freq=12000192 sd_pos=71265 sysload=0.70 cputime=15.297 memavail=3542476 print_time=258.006 buffer_time=2.053 print_stall=0
+Stats 245.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=489771 bytes_read=65553 bytes_retransmit=0 bytes_invalid=0 send_seq=8829 receive_seq=8829 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=33 upcoming_bytes=1817 freq=12000193 sd_pos=74110 sysload=0.65 cputime=15.424 memavail=3544152 print_time=259.039 buffer_time=2.085 print_stall=0
+Stats 246.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=494590 bytes_read=66031 bytes_retransmit=0 bytes_invalid=0 send_seq=8909 receive_seq=8908 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=1525 freq=12000193 sd_pos=77834 sysload=0.65 cputime=15.571 memavail=3544256 print_time=260.135 buffer_time=2.182 print_stall=0
+Stats 247.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=499186 bytes_read=66499 bytes_retransmit=0 bytes_invalid=0 send_seq=8985 receive_seq=8985 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=39 upcoming_bytes=767 freq=12000194 sd_pos=79614 sysload=0.65 cputime=15.633 memavail=3544016 print_time=260.976 buffer_time=2.023 print_stall=0
+Stats 248.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=503335 bytes_read=66932 bytes_retransmit=0 bytes_invalid=0 send_seq=9055 receive_seq=9055 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=56 upcoming_bytes=2158 freq=12000194 sd_pos=83438 sysload=0.65 cputime=15.713 memavail=3544016 print_time=262.197 buffer_time=2.242 print_stall=0
+Stats 249.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=507661 bytes_read=67394 bytes_retransmit=0 bytes_invalid=0 send_seq=9128 receive_seq=9128 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=42 upcoming_bytes=2192 freq=12000194 sd_pos=85548 sysload=0.65 cputime=15.780 memavail=3545404 print_time=263.099 buffer_time=2.144 print_stall=0
+Stats 250.4: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=512481 bytes_read=67877 bytes_retransmit=0 bytes_invalid=0 send_seq=9209 receive_seq=9208 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=12 upcoming_bytes=1582 freq=12000195 sd_pos=87977 sysload=0.60 cputime=15.848 memavail=3545576 print_time=263.961 buffer_time=2.006 print_stall=0
+Stats 251.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=517285 bytes_read=68360 bytes_retransmit=0 bytes_invalid=0 send_seq=9288 receive_seq=9288 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=29 upcoming_bytes=2534 freq=12000196 sd_pos=92041 sysload=0.60 cputime=15.965 memavail=3545264 print_time=265.222 buffer_time=2.250 print_stall=0
+Stats 252.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=522076 bytes_read=68838 bytes_retransmit=0 bytes_invalid=0 send_seq=9367 receive_seq=9367 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=27 upcoming_bytes=2163 freq=12000196 sd_pos=94056 sysload=0.60 cputime=16.085 memavail=3545364 print_time=266.161 buffer_time=2.189 print_stall=0
+Stats 253.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=526775 bytes_read=69306 bytes_retransmit=0 bytes_invalid=0 send_seq=9444 receive_seq=9444 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=52 upcoming_bytes=1445 freq=12000196 sd_pos=95861 sysload=0.60 cputime=16.201 memavail=3545512 print_time=267.001 buffer_time=2.028 print_stall=0
+Stats 254.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000030 mcu_task_stddev=0.000017 bytes_write=531770 bytes_read=69818 bytes_retransmit=0 bytes_invalid=0 send_seq=9528 receive_seq=9527 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=1751 freq=12000195 sd_pos=98974 sysload=0.60 cputime=16.338 memavail=3547380 print_time=268.092 buffer_time=2.118 print_stall=0
+Stats 255.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000030 mcu_task_stddev=0.000017 bytes_write=536193 bytes_read=70276 bytes_retransmit=0 bytes_invalid=0 send_seq=9602 receive_seq=9602 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=57 upcoming_bytes=1431 freq=12000196 sd_pos=100879 sysload=0.55 cputime=16.452 memavail=3547380 print_time=269.018 buffer_time=2.043 print_stall=0
+Stats 256.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000030 mcu_task_stddev=0.000017 bytes_write=541023 bytes_read=70759 bytes_retransmit=0 bytes_invalid=0 send_seq=9682 receive_seq=9682 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=20 upcoming_bytes=1294 freq=12000196 sd_pos=103727 sysload=0.55 cputime=16.581 memavail=3547380 print_time=270.031 buffer_time=2.056 print_stall=0
+Stats 257.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000030 mcu_task_stddev=0.000017 bytes_write=545406 bytes_read=71202 bytes_retransmit=0 bytes_invalid=0 send_seq=9754 receive_seq=9754 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=37 upcoming_bytes=1335 freq=12000196 sd_pos=105884 sysload=0.55 cputime=16.702 memavail=3547380 print_time=271.020 buffer_time=2.043 print_stall=0
+Stats 258.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000030 mcu_task_stddev=0.000017 bytes_write=550121 bytes_read=71675 bytes_retransmit=0 bytes_invalid=0 send_seq=9832 receive_seq=9832 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=37 upcoming_bytes=1012 freq=12000197 sd_pos=108262 sysload=0.55 cputime=16.831 memavail=3547384 print_time=272.034 buffer_time=2.057 print_stall=0
+Stats 259.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=554538 bytes_read=72142 bytes_retransmit=0 bytes_invalid=0 send_seq=9906 receive_seq=9906 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=54 upcoming_bytes=1107 freq=12000197 sd_pos=111046 sysload=0.55 cputime=16.959 memavail=3546896 print_time=272.982 buffer_time=2.005 print_stall=0
+Stats 260.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=558838 bytes_read=72585 bytes_retransmit=0 bytes_invalid=0 send_seq=9978 receive_seq=9978 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=19 upcoming_bytes=2116 freq=12000196 sd_pos=114318 sysload=0.50 cputime=17.096 memavail=3546896 print_time=274.085 buffer_time=2.108 print_stall=0
+Stats 261.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=563565 bytes_read=73053 bytes_retransmit=0 bytes_invalid=0 send_seq=10056 receive_seq=10055 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=14 upcoming_bytes=2039 freq=12000197 sd_pos=116739 sysload=0.50 cputime=17.225 memavail=3546188 print_time=275.046 buffer_time=2.068 print_stall=0
+Stats 262.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=568573 bytes_read=73556 bytes_retransmit=0 bytes_invalid=0 send_seq=10139 receive_seq=10139 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=24 upcoming_bytes=2177 freq=12000197 sd_pos=120299 sysload=0.50 cputime=17.365 memavail=3544676 print_time=276.154 buffer_time=2.176 print_stall=0
+Stats 263.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=573389 bytes_read=74039 bytes_retransmit=0 bytes_invalid=0 send_seq=10219 receive_seq=10219 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=26 upcoming_bytes=954 freq=12000196 sd_pos=122045 sysload=0.50 cputime=17.479 memavail=3544676 print_time=276.991 buffer_time=2.011 print_stall=0
+Stats 264.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=578274 bytes_read=74541 bytes_retransmit=0 bytes_invalid=0 send_seq=10300 receive_seq=10300 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=52 upcoming_bytes=498 freq=12000196 sd_pos=124789 sysload=0.50 cputime=17.612 memavail=3544676 print_time=278.044 buffer_time=2.064 print_stall=0
+Stats 265.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=582410 bytes_read=74969 bytes_retransmit=0 bytes_invalid=0 send_seq=10370 receive_seq=10369 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=24 upcoming_bytes=858 freq=12000197 sd_pos=127124 sysload=0.62 cputime=17.734 memavail=3544436 print_time=279.005 buffer_time=2.024 print_stall=0
+Stats 266.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=586529 bytes_read=75407 bytes_retransmit=0 bytes_invalid=0 send_seq=10440 receive_seq=10440 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=43 upcoming_bytes=1368 freq=12000197 sd_pos=130200 sysload=0.62 cputime=17.856 memavail=3544436 print_time=280.007 buffer_time=2.025 print_stall=0
+Stats 267.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=591102 bytes_read=75870 bytes_retransmit=0 bytes_invalid=0 send_seq=10517 receive_seq=10516 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=20 upcoming_bytes=1174 freq=12000198 sd_pos=132988 sysload=0.62 cputime=17.984 memavail=3544436 print_time=281.055 buffer_time=2.069 print_stall=0
+Stats 268.5: gcodein=0  mcu: mcu_awake=0.017 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=595855 bytes_read=76348 bytes_retransmit=0 bytes_invalid=0 send_seq=10596 receive_seq=10595 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=19 upcoming_bytes=606 freq=12000198 sd_pos=135459 sysload=0.62 cputime=18.105 memavail=3544436 print_time=282.009 buffer_time=2.022 print_stall=0
+Stats 269.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=599996 bytes_read=76790 bytes_retransmit=0 bytes_invalid=0 send_seq=10665 receive_seq=10664 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=7 upcoming_bytes=1351 freq=12000198 sd_pos=138275 sysload=0.62 cputime=18.228 memavail=3544436 print_time=283.028 buffer_time=2.041 print_stall=0
+Stats 270.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=604373 bytes_read=77243 bytes_retransmit=0 bytes_invalid=0 send_seq=10739 receive_seq=10738 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=12 upcoming_bytes=1581 freq=12000198 sd_pos=140994 sysload=0.57 cputime=18.357 memavail=3544436 print_time=284.026 buffer_time=2.038 print_stall=0
+Stats 271.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=609182 bytes_read=77731 bytes_retransmit=0 bytes_invalid=0 send_seq=10819 receive_seq=10819 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=47 upcoming_bytes=1420 freq=12000198 sd_pos=143743 sysload=0.57 cputime=18.491 memavail=3543960 print_time=285.012 buffer_time=2.023 print_stall=0
+Stats 272.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=613781 bytes_read=78189 bytes_retransmit=0 bytes_invalid=0 send_seq=10895 receive_seq=10894 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=21 upcoming_bytes=1219 freq=12000199 sd_pos=146425 sysload=0.57 cputime=18.613 memavail=3543220 print_time=286.042 buffer_time=2.054 print_stall=0
+Stats 273.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=618456 bytes_read=78667 bytes_retransmit=0 bytes_invalid=0 send_seq=10973 receive_seq=10973 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=38 upcoming_bytes=1164 freq=12000199 sd_pos=148873 sysload=0.57 cputime=18.744 memavail=3543220 print_time=287.054 buffer_time=2.065 print_stall=0
+Stats 274.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=622759 bytes_read=79119 bytes_retransmit=0 bytes_invalid=0 send_seq=11044 receive_seq=11044 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=12 upcoming_bytes=1548 freq=12000200 sd_pos=151944 sysload=0.57 cputime=18.871 memavail=3543220 print_time=288.090 buffer_time=2.100 print_stall=0
+Stats 275.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=627397 bytes_read=79592 bytes_retransmit=0 bytes_invalid=0 send_seq=11122 receive_seq=11122 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=24 upcoming_bytes=2496 freq=12000198 sd_pos=155330 sysload=0.53 cputime=19.018 memavail=3543496 print_time=289.339 buffer_time=2.349 print_stall=0
+Stats 276.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=631861 bytes_read=80050 bytes_retransmit=0 bytes_invalid=0 send_seq=11197 receive_seq=11197 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=48 upcoming_bytes=1333 freq=12000196 sd_pos=157169 sysload=0.53 cputime=19.122 memavail=3543256 print_time=290.071 buffer_time=2.080 print_stall=0
+Stats 277.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=636270 bytes_read=80503 bytes_retransmit=0 bytes_invalid=0 send_seq=11271 receive_seq=11271 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=58 upcoming_bytes=1496 freq=12000197 sd_pos=159562 sysload=0.53 cputime=19.240 memavail=3542752 print_time=290.999 buffer_time=2.007 print_stall=0
+Stats 278.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=640955 bytes_read=80976 bytes_retransmit=0 bytes_invalid=0 send_seq=11349 receive_seq=11349 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=18 upcoming_bytes=2428 freq=12000196 sd_pos=162664 sysload=0.53 cputime=19.377 memavail=3542764 print_time=292.185 buffer_time=2.193 print_stall=0
+Stats 279.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=645875 bytes_read=81478 bytes_retransmit=0 bytes_invalid=0 send_seq=11431 receive_seq=11430 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=27 upcoming_bytes=1400 freq=12000196 sd_pos=165056 sysload=0.53 cputime=19.499 memavail=3543392 print_time=293.122 buffer_time=2.129 print_stall=0
+Stats 280.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=650415 bytes_read=81951 bytes_retransmit=0 bytes_invalid=0 send_seq=11508 receive_seq=11508 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=56 upcoming_bytes=669 freq=12000194 sd_pos=167542 sysload=0.56 cputime=19.617 memavail=3543536 print_time=294.013 buffer_time=2.019 print_stall=0
+Stats 281.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=654568 bytes_read=82374 bytes_retransmit=0 bytes_invalid=0 send_seq=11576 receive_seq=11576 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=44 upcoming_bytes=1272 freq=12000194 sd_pos=170278 sysload=0.56 cputime=19.740 memavail=3542528 print_time=295.063 buffer_time=2.069 print_stall=0
+Stats 282.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=658968 bytes_read=82822 bytes_retransmit=0 bytes_invalid=0 send_seq=11649 receive_seq=11649 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=24 upcoming_bytes=1952 freq=12000193 sd_pos=173625 sysload=0.56 cputime=19.875 memavail=3542528 print_time=296.192 buffer_time=2.197 print_stall=0
+Stats 283.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=663541 bytes_read=83280 bytes_retransmit=0 bytes_invalid=0 send_seq=11724 receive_seq=11724 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=22 upcoming_bytes=1155 freq=12000194 sd_pos=175502 sysload=0.56 cputime=19.986 memavail=3542468 print_time=297.035 buffer_time=2.038 print_stall=0
+Stats 284.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000016 bytes_write=668070 bytes_read=83752 bytes_retransmit=0 bytes_invalid=0 send_seq=11800 receive_seq=11799 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=21 upcoming_bytes=1306 freq=12000194 sd_pos=178111 sysload=0.56 cputime=20.106 memavail=3542580 print_time=298.004 buffer_time=2.006 print_stall=0
+Stats 285.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000016 bytes_write=672549 bytes_read=84210 bytes_retransmit=0 bytes_invalid=0 send_seq=11874 receive_seq=11874 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=55 upcoming_bytes=1641 freq=12000193 sd_pos=180734 sysload=0.60 cputime=20.239 memavail=3542340 print_time=298.998 buffer_time=1.999 print_stall=0
+Stats 286.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000016 bytes_write=677401 bytes_read=84698 bytes_retransmit=0 bytes_invalid=0 send_seq=11955 receive_seq=11955 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=51 upcoming_bytes=1174 freq=12000192 sd_pos=183288 sysload=0.60 cputime=20.369 memavail=3542340 print_time=300.015 buffer_time=2.016 print_stall=0
+Stats 287.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000016 bytes_write=682333 bytes_read=85191 bytes_retransmit=0 bytes_invalid=0 send_seq=12037 receive_seq=12037 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=35 upcoming_bytes=917 freq=12000193 sd_pos=185701 sysload=0.60 cputime=20.501 memavail=3542340 print_time=301.025 buffer_time=2.025 print_stall=0
+Stats 288.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000032 mcu_task_stddev=0.000016 bytes_write=686558 bytes_read=85629 bytes_retransmit=0 bytes_invalid=0 send_seq=12108 receive_seq=12108 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=14 upcoming_bytes=684 freq=12000193 sd_pos=188406 sysload=0.60 cputime=20.630 memavail=3542100 print_time=301.998 buffer_time=1.997 print_stall=0
+Stats 289.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=691213 bytes_read=86111 bytes_retransmit=0 bytes_invalid=0 send_seq=12185 receive_seq=12185 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=19 upcoming_bytes=470 freq=12000192 sd_pos=190684 sysload=0.60 cputime=20.760 memavail=3542100 print_time=303.030 buffer_time=2.027 print_stall=0
+Stats 290.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=695253 bytes_read=86529 bytes_retransmit=0 bytes_invalid=0 send_seq=12252 receive_seq=12252 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=34 upcoming_bytes=871 freq=12000193 sd_pos=193308 sysload=0.55 cputime=20.878 memavail=3542100 print_time=304.039 buffer_time=2.035 print_stall=0
+Stats 291.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=699357 bytes_read=86952 bytes_retransmit=0 bytes_invalid=0 send_seq=12320 receive_seq=12320 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=26 upcoming_bytes=1539 freq=12000193 sd_pos=196167 sysload=0.55 cputime=21.011 memavail=3542020 print_time=305.098 buffer_time=2.093 print_stall=0
+Stats 292.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=703949 bytes_read=87420 bytes_retransmit=0 bytes_invalid=0 send_seq=12397 receive_seq=12397 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=7 upcoming_bytes=1280 freq=12000194 sd_pos=198097 sysload=0.55 cputime=21.132 memavail=3542132 print_time=306.035 buffer_time=2.030 print_stall=0
+Stats 293.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=708564 bytes_read=87878 bytes_retransmit=0 bytes_invalid=0 send_seq=12473 receive_seq=12472 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=6 upcoming_bytes=925 freq=12000194 sd_pos=200850 sysload=0.55 cputime=21.254 memavail=3541644 print_time=307.063 buffer_time=2.057 print_stall=0
+Stats 294.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=712989 bytes_read=88350 bytes_retransmit=0 bytes_invalid=0 send_seq=12547 receive_seq=12547 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=6 upcoming_bytes=713 freq=12000194 sd_pos=203494 sysload=0.55 cputime=21.383 memavail=3541428 print_time=308.011 buffer_time=2.004 print_stall=0
+Stats 295.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=717232 bytes_read=88783 bytes_retransmit=0 bytes_invalid=0 send_seq=12617 receive_seq=12617 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=23 upcoming_bytes=1051 freq=12000195 sd_pos=206186 sysload=0.67 cputime=21.514 memavail=3541680 print_time=309.020 buffer_time=2.012 print_stall=0
+Stats 296.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=721693 bytes_read=89231 bytes_retransmit=0 bytes_invalid=0 send_seq=12691 receive_seq=12690 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=31 upcoming_bytes=1049 freq=12000195 sd_pos=210966 sysload=0.67 cputime=21.702 memavail=3541680 print_time=310.750 buffer_time=2.741 print_stall=0
+Finished SD card print
+Exiting SD card print (position 211084)
+Stats 297.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=723269 bytes_read=89464 bytes_retransmit=0 bytes_invalid=0 send_seq=12720 receive_seq=12720 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=13 upcoming_bytes=0 freq=12000195  sysload=0.67 cputime=21.726 memavail=3541684 print_time=310.815 buffer_time=1.806 print_stall=0
+Stats 298.5: gcodein=0  mcu: mcu_awake=0.016 mcu_task_avg=0.000031 mcu_task_stddev=0.000017 bytes_write=723717 bytes_read=89602 bytes_retransmit=0 bytes_invalid=0 send_seq=12731 receive_seq=12731 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=49 upcoming_bytes=0 freq=12000195  sysload=0.67 cputime=21.745 memavail=3537948 print_time=311.528 buffer_time=1.518 print_stall=0
+Stats 299.5: gcodein=0  mcu: mcu_awake=0.010 mcu_task_avg=0.000028 mcu_task_stddev=0.000018 bytes_write=723828 bytes_read=89724 bytes_retransmit=0 bytes_invalid=0 send_seq=12736 receive_seq=12736 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.67 cputime=21.757 memavail=3537948 print_time=311.528 buffer_time=0.517 print_stall=0
+Stats 300.5: gcodein=0  mcu: mcu_awake=0.010 mcu_task_avg=0.000028 mcu_task_stddev=0.000018 bytes_write=723999 bytes_read=89842 bytes_retransmit=0 bytes_invalid=0 send_seq=12743 receive_seq=12743 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.69 cputime=21.769 memavail=3546516 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 301.5: gcodein=0  mcu: mcu_awake=0.010 mcu_task_avg=0.000028 mcu_task_stddev=0.000018 bytes_write=724067 bytes_read=89950 bytes_retransmit=0 bytes_invalid=0 send_seq=12749 receive_seq=12748 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.69 cputime=21.780 memavail=3546516 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 302.5: gcodein=0  mcu: mcu_awake=0.010 mcu_task_avg=0.000028 mcu_task_stddev=0.000018 bytes_write=724129 bytes_read=90074 bytes_retransmit=0 bytes_invalid=0 send_seq=12754 receive_seq=12754 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.69 cputime=21.799 memavail=3546516 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 303.5: gcodein=0  mcu: mcu_awake=0.010 mcu_task_avg=0.000028 mcu_task_stddev=0.000018 bytes_write=724191 bytes_read=90182 bytes_retransmit=0 bytes_invalid=0 send_seq=12759 receive_seq=12759 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.69 cputime=21.817 memavail=3546272 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 304.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000009 mcu_task_stddev=0.000007 bytes_write=724253 bytes_read=90302 bytes_retransmit=0 bytes_invalid=0 send_seq=12764 receive_seq=12764 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.69 cputime=21.837 memavail=3546272 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 305.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000009 mcu_task_stddev=0.000007 bytes_write=724315 bytes_read=90410 bytes_retransmit=0 bytes_invalid=0 send_seq=12769 receive_seq=12769 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.72 cputime=21.855 memavail=3546272 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 306.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000009 mcu_task_stddev=0.000007 bytes_write=724377 bytes_read=90518 bytes_retransmit=0 bytes_invalid=0 send_seq=12774 receive_seq=12774 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.72 cputime=21.873 memavail=3546272 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 307.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000009 mcu_task_stddev=0.000007 bytes_write=724439 bytes_read=90626 bytes_retransmit=0 bytes_invalid=0 send_seq=12779 receive_seq=12779 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.72 cputime=21.891 memavail=3546272 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 308.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000009 mcu_task_stddev=0.000007 bytes_write=724501 bytes_read=90734 bytes_retransmit=0 bytes_invalid=0 send_seq=12784 receive_seq=12784 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.72 cputime=21.911 memavail=3546272 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 309.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=724563 bytes_read=90854 bytes_retransmit=0 bytes_invalid=0 send_seq=12789 receive_seq=12789 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.72 cputime=21.930 memavail=3546272 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 310.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=724625 bytes_read=90962 bytes_retransmit=0 bytes_invalid=0 send_seq=12794 receive_seq=12794 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.74 cputime=21.949 memavail=3546272 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 311.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=724687 bytes_read=91070 bytes_retransmit=0 bytes_invalid=0 send_seq=12799 receive_seq=12799 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.74 cputime=21.968 memavail=3545796 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 312.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=724749 bytes_read=91178 bytes_retransmit=0 bytes_invalid=0 send_seq=12804 receive_seq=12804 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.74 cputime=21.987 memavail=3545844 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 313.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=724811 bytes_read=91286 bytes_retransmit=0 bytes_invalid=0 send_seq=12809 receive_seq=12809 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.74 cputime=22.006 memavail=3545844 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 314.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=724873 bytes_read=91405 bytes_retransmit=0 bytes_invalid=0 send_seq=12814 receive_seq=12814 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.74 cputime=22.027 memavail=3545844 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 315.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=724935 bytes_read=91513 bytes_retransmit=0 bytes_invalid=0 send_seq=12819 receive_seq=12819 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.68 cputime=22.046 memavail=3545844 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 316.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=724997 bytes_read=91621 bytes_retransmit=0 bytes_invalid=0 send_seq=12824 receive_seq=12824 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.68 cputime=22.065 memavail=3545844 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 317.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725059 bytes_read=91729 bytes_retransmit=0 bytes_invalid=0 send_seq=12829 receive_seq=12829 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.68 cputime=22.084 memavail=3545844 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 318.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725121 bytes_read=91837 bytes_retransmit=0 bytes_invalid=0 send_seq=12834 receive_seq=12834 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.68 cputime=22.104 memavail=3545844 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 319.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725183 bytes_read=91956 bytes_retransmit=0 bytes_invalid=0 send_seq=12839 receive_seq=12839 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.68 cputime=22.122 memavail=3545844 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 320.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725245 bytes_read=92064 bytes_retransmit=0 bytes_invalid=0 send_seq=12844 receive_seq=12844 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.63 cputime=22.139 memavail=3545844 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 321.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725307 bytes_read=92172 bytes_retransmit=0 bytes_invalid=0 send_seq=12849 receive_seq=12849 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.63 cputime=22.158 memavail=3546004 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 322.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725369 bytes_read=92280 bytes_retransmit=0 bytes_invalid=0 send_seq=12854 receive_seq=12854 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.63 cputime=22.177 memavail=3546116 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 323.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725431 bytes_read=92388 bytes_retransmit=0 bytes_invalid=0 send_seq=12859 receive_seq=12859 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.63 cputime=22.195 memavail=3546116 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 324.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725493 bytes_read=92508 bytes_retransmit=0 bytes_invalid=0 send_seq=12864 receive_seq=12864 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.63 cputime=22.214 memavail=3546116 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 325.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725555 bytes_read=92616 bytes_retransmit=0 bytes_invalid=0 send_seq=12869 receive_seq=12869 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.58 cputime=22.233 memavail=3546052 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 326.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725617 bytes_read=92724 bytes_retransmit=0 bytes_invalid=0 send_seq=12874 receive_seq=12874 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.58 cputime=22.251 memavail=3546160 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 327.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725679 bytes_read=92832 bytes_retransmit=0 bytes_invalid=0 send_seq=12879 receive_seq=12879 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000198  sysload=0.58 cputime=22.271 memavail=3546160 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 328.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725741 bytes_read=92940 bytes_retransmit=0 bytes_invalid=0 send_seq=12884 receive_seq=12884 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000198  sysload=0.58 cputime=22.289 memavail=3546160 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 329.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725803 bytes_read=93060 bytes_retransmit=0 bytes_invalid=0 send_seq=12889 receive_seq=12889 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000198  sysload=0.58 cputime=22.309 memavail=3546160 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 330.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725865 bytes_read=93168 bytes_retransmit=0 bytes_invalid=0 send_seq=12894 receive_seq=12894 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000198  sysload=0.53 cputime=22.328 memavail=3546160 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 331.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725927 bytes_read=93276 bytes_retransmit=0 bytes_invalid=0 send_seq=12899 receive_seq=12899 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000198  sysload=0.53 cputime=22.348 memavail=3544940 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 332.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=725989 bytes_read=93384 bytes_retransmit=0 bytes_invalid=0 send_seq=12904 receive_seq=12904 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000198  sysload=0.53 cputime=22.367 memavail=3544960 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 333.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726051 bytes_read=93492 bytes_retransmit=0 bytes_invalid=0 send_seq=12909 receive_seq=12909 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000198  sysload=0.53 cputime=22.386 memavail=3544960 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 334.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726113 bytes_read=93611 bytes_retransmit=0 bytes_invalid=0 send_seq=12914 receive_seq=12914 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.53 cputime=22.405 memavail=3544960 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 335.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726175 bytes_read=93719 bytes_retransmit=0 bytes_invalid=0 send_seq=12919 receive_seq=12919 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.57 cputime=22.424 memavail=3544960 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 336.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726237 bytes_read=93827 bytes_retransmit=0 bytes_invalid=0 send_seq=12924 receive_seq=12924 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.57 cputime=22.442 memavail=3544960 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 337.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726299 bytes_read=93935 bytes_retransmit=0 bytes_invalid=0 send_seq=12929 receive_seq=12929 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.57 cputime=22.461 memavail=3544960 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 338.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726361 bytes_read=94043 bytes_retransmit=0 bytes_invalid=0 send_seq=12934 receive_seq=12934 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.57 cputime=22.480 memavail=3544960 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 339.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726423 bytes_read=94163 bytes_retransmit=0 bytes_invalid=0 send_seq=12939 receive_seq=12939 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000198  sysload=0.57 cputime=22.499 memavail=3544960 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 340.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726485 bytes_read=94271 bytes_retransmit=0 bytes_invalid=0 send_seq=12944 receive_seq=12944 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.52 cputime=22.517 memavail=3544960 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 341.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726547 bytes_read=94378 bytes_retransmit=0 bytes_invalid=0 send_seq=12949 receive_seq=12949 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.52 cputime=22.536 memavail=3544960 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 342.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726609 bytes_read=94485 bytes_retransmit=0 bytes_invalid=0 send_seq=12954 receive_seq=12954 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.52 cputime=22.555 memavail=3544980 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 343.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726671 bytes_read=94592 bytes_retransmit=0 bytes_invalid=0 send_seq=12959 receive_seq=12959 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.52 cputime=22.573 memavail=3544980 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 344.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726733 bytes_read=94710 bytes_retransmit=0 bytes_invalid=0 send_seq=12964 receive_seq=12964 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.52 cputime=22.592 memavail=3544980 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 345.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726795 bytes_read=94817 bytes_retransmit=0 bytes_invalid=0 send_seq=12969 receive_seq=12969 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.56 cputime=22.610 memavail=3544980 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 346.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726857 bytes_read=94924 bytes_retransmit=0 bytes_invalid=0 send_seq=12974 receive_seq=12974 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.56 cputime=22.627 memavail=3544980 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 347.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726919 bytes_read=95031 bytes_retransmit=0 bytes_invalid=0 send_seq=12979 receive_seq=12979 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.56 cputime=22.645 memavail=3544980 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 348.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=726981 bytes_read=95138 bytes_retransmit=0 bytes_invalid=0 send_seq=12984 receive_seq=12984 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.56 cputime=22.663 memavail=3544980 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 349.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727043 bytes_read=95256 bytes_retransmit=0 bytes_invalid=0 send_seq=12989 receive_seq=12989 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.56 cputime=22.681 memavail=3544980 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 350.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727105 bytes_read=95363 bytes_retransmit=0 bytes_invalid=0 send_seq=12994 receive_seq=12994 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000196  sysload=0.60 cputime=22.699 memavail=3544980 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 351.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727167 bytes_read=95470 bytes_retransmit=0 bytes_invalid=0 send_seq=12999 receive_seq=12999 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.60 cputime=22.717 memavail=3544980 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 352.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727229 bytes_read=95577 bytes_retransmit=0 bytes_invalid=0 send_seq=13004 receive_seq=13004 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.60 cputime=22.735 memavail=3545000 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 353.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727291 bytes_read=95684 bytes_retransmit=0 bytes_invalid=0 send_seq=13009 receive_seq=13009 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.60 cputime=22.753 memavail=3545000 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 354.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727353 bytes_read=95803 bytes_retransmit=0 bytes_invalid=0 send_seq=13014 receive_seq=13014 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.60 cputime=22.771 memavail=3545000 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 355.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727415 bytes_read=95910 bytes_retransmit=0 bytes_invalid=0 send_seq=13019 receive_seq=13019 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.55 cputime=22.789 memavail=3545000 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 356.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727477 bytes_read=96017 bytes_retransmit=0 bytes_invalid=0 send_seq=13024 receive_seq=13024 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.55 cputime=22.807 memavail=3545000 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 357.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727539 bytes_read=96124 bytes_retransmit=0 bytes_invalid=0 send_seq=13029 receive_seq=13029 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000195  sysload=0.55 cputime=22.825 memavail=3545000 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 358.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727601 bytes_read=96231 bytes_retransmit=0 bytes_invalid=0 send_seq=13034 receive_seq=13034 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000194  sysload=0.55 cputime=22.842 memavail=3545000 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 359.5: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=727663 bytes_read=96349 bytes_retransmit=0 bytes_invalid=0 send_seq=13039 receive_seq=13039 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000194  sysload=0.55 cputime=22.860 memavail=3545000 print_time=311.528 buffer_time=0.000 print_stall=0
+Stats 900.9: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=761280 bytes_read=156125 bytes_retransmit=0 bytes_invalid=0 send_seq=15754 receive_seq=15754 retransmit_seq=0 srtt=0.000 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.49 cputime=31.860 memavail=3536952 print_time=912.490 buffer_time=0.033 print_stall=0
+Stats 901.9: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=761286 bytes_read=156141 bytes_retransmit=0 bytes_invalid=0 send_seq=15755 receive_seq=15755 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.49 cputime=31.871 memavail=3536712 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 902.9: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=761292 bytes_read=156157 bytes_retransmit=0 bytes_invalid=0 send_seq=15756 receive_seq=15756 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.49 cputime=31.881 memavail=3536712 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 903.9: gcodein=0  mcu: mcu_awake=0.001 mcu_task_avg=0.000008 mcu_task_stddev=0.000006 bytes_write=761298 bytes_read=156173 bytes_retransmit=0 bytes_invalid=0 send_seq=15757 receive_seq=15757 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.49 cputime=31.892 memavail=3536712 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 904.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000005 mcu_task_stddev=0.000005 bytes_write=761304 bytes_read=156200 bytes_retransmit=0 bytes_invalid=0 send_seq=15758 receive_seq=15758 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.49 cputime=31.903 memavail=3536712 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 905.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000005 mcu_task_stddev=0.000005 bytes_write=761310 bytes_read=156216 bytes_retransmit=0 bytes_invalid=0 send_seq=15759 receive_seq=15759 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.45 cputime=31.914 memavail=3537468 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 906.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000005 mcu_task_stddev=0.000005 bytes_write=761316 bytes_read=156232 bytes_retransmit=0 bytes_invalid=0 send_seq=15760 receive_seq=15760 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.45 cputime=31.924 memavail=3537468 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 907.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000005 mcu_task_stddev=0.000005 bytes_write=761322 bytes_read=156248 bytes_retransmit=0 bytes_invalid=0 send_seq=15761 receive_seq=15761 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.45 cputime=31.935 memavail=3537468 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 908.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000005 mcu_task_stddev=0.000005 bytes_write=761328 bytes_read=156264 bytes_retransmit=0 bytes_invalid=0 send_seq=15762 receive_seq=15762 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.45 cputime=31.946 memavail=3537468 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 909.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761334 bytes_read=156291 bytes_retransmit=0 bytes_invalid=0 send_seq=15763 receive_seq=15763 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.45 cputime=31.957 memavail=3537468 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 910.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761340 bytes_read=156307 bytes_retransmit=0 bytes_invalid=0 send_seq=15764 receive_seq=15764 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.42 cputime=31.968 memavail=3537492 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 911.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761346 bytes_read=156323 bytes_retransmit=0 bytes_invalid=0 send_seq=15765 receive_seq=15765 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.42 cputime=31.978 memavail=3537492 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 912.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761352 bytes_read=156339 bytes_retransmit=0 bytes_invalid=0 send_seq=15766 receive_seq=15766 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.42 cputime=31.989 memavail=3537492 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 913.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761358 bytes_read=156355 bytes_retransmit=0 bytes_invalid=0 send_seq=15767 receive_seq=15767 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.42 cputime=32.000 memavail=3537492 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 914.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761370 bytes_read=156398 bytes_retransmit=0 bytes_invalid=0 send_seq=15769 receive_seq=15769 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.42 cputime=32.010 memavail=3537492 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 915.9: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761376 bytes_read=156414 bytes_retransmit=0 bytes_invalid=0 send_seq=15770 receive_seq=15770 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.46 cputime=32.021 memavail=3537500 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 917.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761382 bytes_read=156430 bytes_retransmit=0 bytes_invalid=0 send_seq=15771 receive_seq=15771 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.46 cputime=32.032 memavail=3537500 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 918.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761388 bytes_read=156446 bytes_retransmit=0 bytes_invalid=0 send_seq=15772 receive_seq=15772 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.46 cputime=32.042 memavail=3537500 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 919.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761394 bytes_read=156462 bytes_retransmit=0 bytes_invalid=0 send_seq=15773 receive_seq=15773 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.46 cputime=32.053 memavail=3537500 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 920.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761400 bytes_read=156489 bytes_retransmit=0 bytes_invalid=0 send_seq=15774 receive_seq=15774 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.46 cputime=32.064 memavail=3537500 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 921.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761406 bytes_read=156505 bytes_retransmit=0 bytes_invalid=0 send_seq=15775 receive_seq=15775 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.51 cputime=32.075 memavail=3537508 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 922.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761412 bytes_read=156521 bytes_retransmit=0 bytes_invalid=0 send_seq=15776 receive_seq=15776 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.51 cputime=32.086 memavail=3537044 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 923.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761418 bytes_read=156537 bytes_retransmit=0 bytes_invalid=0 send_seq=15777 receive_seq=15777 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.51 cputime=32.096 memavail=3537044 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 924.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761424 bytes_read=156553 bytes_retransmit=0 bytes_invalid=0 send_seq=15778 receive_seq=15778 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.51 cputime=32.107 memavail=3537044 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 925.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761430 bytes_read=156580 bytes_retransmit=0 bytes_invalid=0 send_seq=15779 receive_seq=15779 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.51 cputime=32.119 memavail=3537048 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 926.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761436 bytes_read=156596 bytes_retransmit=0 bytes_invalid=0 send_seq=15780 receive_seq=15780 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.55 cputime=32.130 memavail=3537804 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 927.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761442 bytes_read=156612 bytes_retransmit=0 bytes_invalid=0 send_seq=15781 receive_seq=15781 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.55 cputime=32.140 memavail=3537804 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 928.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761448 bytes_read=156628 bytes_retransmit=0 bytes_invalid=0 send_seq=15782 receive_seq=15782 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.55 cputime=32.151 memavail=3537804 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 929.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761454 bytes_read=156644 bytes_retransmit=0 bytes_invalid=0 send_seq=15783 receive_seq=15783 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.55 cputime=32.162 memavail=3537804 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 930.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761460 bytes_read=156671 bytes_retransmit=0 bytes_invalid=0 send_seq=15784 receive_seq=15784 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.55 cputime=32.173 memavail=3537804 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 931.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761466 bytes_read=156687 bytes_retransmit=0 bytes_invalid=0 send_seq=15785 receive_seq=15785 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.50 cputime=32.185 memavail=3537808 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 932.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761472 bytes_read=156703 bytes_retransmit=0 bytes_invalid=0 send_seq=15786 receive_seq=15786 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.50 cputime=32.196 memavail=3536560 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 933.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761478 bytes_read=156719 bytes_retransmit=0 bytes_invalid=0 send_seq=15787 receive_seq=15787 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.50 cputime=32.207 memavail=3536560 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 934.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761484 bytes_read=156735 bytes_retransmit=0 bytes_invalid=0 send_seq=15788 receive_seq=15788 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.50 cputime=32.218 memavail=3536560 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 935.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761490 bytes_read=156762 bytes_retransmit=0 bytes_invalid=0 send_seq=15789 receive_seq=15789 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.50 cputime=32.229 memavail=3536560 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 936.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761496 bytes_read=156778 bytes_retransmit=0 bytes_invalid=0 send_seq=15790 receive_seq=15790 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.46 cputime=32.240 memavail=3536560 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 937.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761502 bytes_read=156794 bytes_retransmit=0 bytes_invalid=0 send_seq=15791 receive_seq=15791 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.46 cputime=32.251 memavail=3536564 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 938.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761508 bytes_read=156810 bytes_retransmit=0 bytes_invalid=0 send_seq=15792 receive_seq=15792 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.46 cputime=32.263 memavail=3536564 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 939.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761514 bytes_read=156826 bytes_retransmit=0 bytes_invalid=0 send_seq=15793 receive_seq=15793 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.46 cputime=32.271 memavail=3536368 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 940.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761520 bytes_read=156853 bytes_retransmit=0 bytes_invalid=0 send_seq=15794 receive_seq=15794 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000189  sysload=0.46 cputime=32.278 memavail=3536628 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 941.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761526 bytes_read=156869 bytes_retransmit=0 bytes_invalid=0 send_seq=15795 receive_seq=15795 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.51 cputime=32.284 memavail=3536628 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 942.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761532 bytes_read=156885 bytes_retransmit=0 bytes_invalid=0 send_seq=15796 receive_seq=15796 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.51 cputime=32.291 memavail=3536164 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 943.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761538 bytes_read=156901 bytes_retransmit=0 bytes_invalid=0 send_seq=15797 receive_seq=15797 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.51 cputime=32.297 memavail=3536164 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 944.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761544 bytes_read=156917 bytes_retransmit=0 bytes_invalid=0 send_seq=15798 receive_seq=15798 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.51 cputime=32.306 memavail=3536164 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 945.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761550 bytes_read=156944 bytes_retransmit=0 bytes_invalid=0 send_seq=15799 receive_seq=15799 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.51 cputime=32.317 memavail=3536164 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 946.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761556 bytes_read=156960 bytes_retransmit=0 bytes_invalid=0 send_seq=15800 receive_seq=15800 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.46 cputime=32.326 memavail=3536164 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 947.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761562 bytes_read=156976 bytes_retransmit=0 bytes_invalid=0 send_seq=15801 receive_seq=15801 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.46 cputime=32.332 memavail=3536164 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 948.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761568 bytes_read=156992 bytes_retransmit=0 bytes_invalid=0 send_seq=15802 receive_seq=15802 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.46 cputime=32.338 memavail=3536164 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 949.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761574 bytes_read=157008 bytes_retransmit=0 bytes_invalid=0 send_seq=15803 receive_seq=15803 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000187  sysload=0.46 cputime=32.344 memavail=3536164 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 950.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761580 bytes_read=157035 bytes_retransmit=0 bytes_invalid=0 send_seq=15804 receive_seq=15804 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000187  sysload=0.46 cputime=32.350 memavail=3536164 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 951.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761586 bytes_read=157051 bytes_retransmit=0 bytes_invalid=0 send_seq=15805 receive_seq=15805 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000187  sysload=0.51 cputime=32.360 memavail=3536164 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 952.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761592 bytes_read=157067 bytes_retransmit=0 bytes_invalid=0 send_seq=15806 receive_seq=15806 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.51 cputime=32.371 memavail=3535912 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 953.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761598 bytes_read=157083 bytes_retransmit=0 bytes_invalid=0 send_seq=15807 receive_seq=15807 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.51 cputime=32.381 memavail=3535912 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 954.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761604 bytes_read=157099 bytes_retransmit=0 bytes_invalid=0 send_seq=15808 receive_seq=15808 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.51 cputime=32.392 memavail=3535912 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 955.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761610 bytes_read=157126 bytes_retransmit=0 bytes_invalid=0 send_seq=15809 receive_seq=15809 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.51 cputime=32.403 memavail=3535912 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 956.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761616 bytes_read=157142 bytes_retransmit=0 bytes_invalid=0 send_seq=15810 receive_seq=15810 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000188  sysload=0.47 cputime=32.411 memavail=3535912 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 957.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761622 bytes_read=157158 bytes_retransmit=0 bytes_invalid=0 send_seq=15811 receive_seq=15811 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000187  sysload=0.47 cputime=32.417 memavail=3535912 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 958.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761628 bytes_read=157174 bytes_retransmit=0 bytes_invalid=0 send_seq=15812 receive_seq=15812 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000187  sysload=0.47 cputime=32.423 memavail=3535912 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 959.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761634 bytes_read=157190 bytes_retransmit=0 bytes_invalid=0 send_seq=15813 receive_seq=15813 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000187  sysload=0.47 cputime=32.429 memavail=3535912 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 960.0: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=761640 bytes_read=157217 bytes_retransmit=0 bytes_invalid=0 send_seq=15814 receive_seq=15814 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000187  sysload=0.47 cputime=32.436 memavail=3535912 print_time=912.490 buffer_time=0.000 print_stall=0
+Stats 1380.3: gcodein=0  mcu: mcu_awake=0.000 mcu_task_avg=0.000004 mcu_task_stddev=0.000004 bytes_write=764202 bytes_read=164950 bytes_retransmit=0 bytes_invalid=0 send_seq=16241 receive_seq=16241 retransmit_seq=0 srtt=0.001 rttvar=0.000 rto=0.025 ready_bytes=0 upcoming_bytes=0 freq=12000197  sysload=0.35 cputime=36.334 memavail=3535564 print_time=1391.886 buffer_time=0.053 print_stall=0
+Attempting MCU 'mcu' reset command
+webhooks client 548392688464: Disconnected
+Restarting printer
+Start printer at Fri May  9 13:56:23 2025 (1746766583.0 1381.5)
+===== Config file =====
+[printer]
+kinematics = corexy
+max_velocity = 500
+max_accel = 15000
+max_z_velocity = 8
+square_corner_velocity = 5.0
+
+[stepper_x]
+step_pin = gpio6
+dir_pin = gpio3
+enable_pin = !gpio7
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = tmc2209_stepper_x:virtual_endstop
+position_endstop = 0
+position_max = 82
+homing_speed = 40
+homing_retract_dist = 0
+
+[tmc2209 stepper_x]
+uart_pin = gpio9
+uart_address = 0
+run_current = 0.5
+stealthchop_threshold = 999999
+diag_pin = ^gpio13
+driver_sgthrs = 30
+
+[stepper_y]
+step_pin = gpio1
+dir_pin = gpio0
+enable_pin = !gpio2
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = tmc2209_stepper_y:virtual_endstop
+position_endstop = 0
+position_max = 65
+homing_speed = 40
+homing_retract_dist = 0
+
+[tmc2209 stepper_y]
+uart_pin = gpio9
+uart_address = 1
+run_current = 0.5
+stealthchop_threshold = 999999
+diag_pin = ^gpio14
+driver_sgthrs = 24
+
+[stepper_z]
+step_pin = gpio26
+dir_pin = gpio25
+enable_pin = !gpio27
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = ^!gpio15
+position_min = -5.0
+position_max = 120
+homing_speed = 12
+position_endstop = 0.2
+
+[tmc2209 stepper_z]
+uart_pin = gpio9
+uart_address = 2
+run_current = 0.5
+stealthchop_threshold = 999999
+
+[pwm_tool LASER]
+pin = gpio10
+shutdown_value = 0
+
+[gcode_macro M02]
+gcode = 
+	G1 X0  F3000
+	
+	G1 Y57
+	M3
+	G1 Y63 F600
+	G1 Y57
+	G1 Y63
+	G1 Y60
+	M5
+	M18
+
+[gcode_macro M3]
+gcode = 
+	SET_PIN PIN=LASER VALUE=1
+	G4 P10
+
+[gcode_macro M5]
+gcode = 
+	G4 P2
+	SET_PIN PIN=LASER VALUE=0
+
+[gcode_macro LASER_ON]
+gcode = 
+	
+	SET_PIN PIN=LASER VALUE=1
+
+[gcode_macro LASER_OFF]
+gcode = 
+	SET_PIN PIN=LASER VALUE=0
+
+[gcode_macro G00]
+gcode = 
+	G1 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G01]
+gcode = 
+	G1 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G02]
+gcode = 
+	G2 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G03]
+gcode = 
+	G2 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G04]
+gcode = 
+	G4 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro M03]
+gcode = 
+	M3 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro M05]
+gcode = 
+	M5 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[mcu]
+serial = /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00
+restart_method = command
+
+[virtual_sdcard]
+path = /home/ooe/printer_data/gcodes
+
+[display_status]
+
+[pause_resume]
+
+[gcode_arcs]
+resolution = 0.1
+
+[gcode_macro CANCEL_PRINT]
+rename_existing = BASE_CANCEL_PRINT
+gcode = 
+	BASE_CANCEL_PRINT
+
+[homing_override]
+set_position_x = 0
+set_position_y = 0
+set_position_z = 0
+gcode = 
+	{% set home_all = 'X' not in params and 'Y' not in params and 'Z' not in params %}
+	{% if home_all or 'X' in params %}
+	_HOME_X
+	{% endif %}
+	{% if home_all or 'Y' in params %}
+	_HOME_Y
+	{% endif %}
+	{% if home_all or 'Z' in params %}
+	
+	
+	{% endif %}
+axes = xyz
+
+[gcode_macro PAUSE]
+rename_existing = BASE_PAUSE
+gcode = 
+
+[gcode_macro RESUME]
+rename_existing = BASE_RESUME
+gcode = 
+
+[gcode_macro MOTOR_OFF]
+gcode = 
+	M18
+
+[gcode_macro _HOME_X]
+gcode = 
+	G28 X
+	G91
+	G1 X+5 F3000
+	G4 P2000
+
+[gcode_macro _HOME_Y]
+gcode = 
+	G28 Y
+	G91
+	G1 Y+5 F3000
+	G4 P100
+
+[input_shaper]
+shaper_type_x = zv
+shaper_freq_x = 83.2
+shaper_type_y = zv
+shaper_freq_y = 58.6
+=======================
+mcu 'mcu': Starting serial connect
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+webhooks client 548392255888: New connection
+webhooks client 548392255888: Client info {'program': 'Moonraker', 'version': 'v0.9.3-3-gccfe32f'}
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+Unable to issue reset command on MCU 'mcu'
+webhooks client 548392255888: Disconnected
+Restarting printer
+Start printer at Fri May  9 13:57:45 2025 (1746766665.2 1463.7)
+===== Config file =====
+[printer]
+kinematics = corexy
+max_velocity = 500
+max_accel = 15000
+max_z_velocity = 8
+square_corner_velocity = 5.0
+
+[stepper_x]
+step_pin = gpio6
+dir_pin = gpio3
+enable_pin = !gpio7
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = tmc2209_stepper_x:virtual_endstop
+position_endstop = 0
+position_max = 82
+homing_speed = 40
+homing_retract_dist = 0
+
+[tmc2209 stepper_x]
+uart_pin = gpio9
+uart_address = 0
+run_current = 0.5
+stealthchop_threshold = 999999
+diag_pin = ^gpio13
+driver_sgthrs = 30
+
+[stepper_y]
+step_pin = gpio1
+dir_pin = gpio0
+enable_pin = !gpio2
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = tmc2209_stepper_y:virtual_endstop
+position_endstop = 0
+position_max = 65
+homing_speed = 40
+homing_retract_dist = 0
+
+[tmc2209 stepper_y]
+uart_pin = gpio9
+uart_address = 1
+run_current = 0.5
+stealthchop_threshold = 999999
+diag_pin = ^gpio14
+driver_sgthrs = 24
+
+[stepper_z]
+step_pin = gpio26
+dir_pin = gpio25
+enable_pin = !gpio27
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = ^!gpio15
+position_min = -5.0
+position_max = 120
+homing_speed = 12
+position_endstop = 0.2
+
+[tmc2209 stepper_z]
+uart_pin = gpio9
+uart_address = 2
+run_current = 0.5
+stealthchop_threshold = 999999
+
+[pwm_tool LASER]
+pin = gpio10
+shutdown_value = 0
+
+[gcode_macro M02]
+gcode = 
+	G1 X0  F3000
+	
+	G1 Y57
+	M3
+	G1 Y63 F600
+	G1 Y57
+	G1 Y63
+	G1 Y60
+	M5
+	M18
+
+[gcode_macro M3]
+gcode = 
+	SET_PIN PIN=LASER VALUE=1
+	G4 P10
+
+[gcode_macro M5]
+gcode = 
+	G4 P2
+	SET_PIN PIN=LASER VALUE=0
+
+[gcode_macro LASER_ON]
+gcode = 
+	
+	SET_PIN PIN=LASER VALUE=1
+
+[gcode_macro LASER_OFF]
+gcode = 
+	SET_PIN PIN=LASER VALUE=0
+
+[gcode_macro G00]
+gcode = 
+	G1 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G01]
+gcode = 
+	G1 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G02]
+gcode = 
+	G2 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G03]
+gcode = 
+	G2 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G04]
+gcode = 
+	G4 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro M03]
+gcode = 
+	M3 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro M05]
+gcode = 
+	M5 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[mcu]
+serial = /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00
+restart_method = command
+
+[virtual_sdcard]
+path = /home/ooe/printer_data/gcodes
+
+[display_status]
+
+[pause_resume]
+
+[gcode_arcs]
+resolution = 0.1
+
+[gcode_macro CANCEL_PRINT]
+rename_existing = BASE_CANCEL_PRINT
+gcode = 
+	BASE_CANCEL_PRINT
+
+[homing_override]
+set_position_x = 0
+set_position_y = 0
+set_position_z = 0
+gcode = 
+	{% set home_all = 'X' not in params and 'Y' not in params and 'Z' not in params %}
+	{% if home_all or 'X' in params %}
+	_HOME_X
+	{% endif %}
+	{% if home_all or 'Y' in params %}
+	_HOME_Y
+	{% endif %}
+	{% if home_all or 'Z' in params %}
+	
+	
+	{% endif %}
+axes = xyz
+
+[gcode_macro PAUSE]
+rename_existing = BASE_PAUSE
+gcode = 
+
+[gcode_macro RESUME]
+rename_existing = BASE_RESUME
+gcode = 
+
+[gcode_macro MOTOR_OFF]
+gcode = 
+	M18
+
+[gcode_macro _HOME_X]
+gcode = 
+	G28 X
+	G91
+	G1 X+5 F3000
+	G4 P2000
+
+[gcode_macro _HOME_Y]
+gcode = 
+	G28 Y
+	G91
+	G1 Y+5 F3000
+	G4 P100
+
+[input_shaper]
+shaper_type_x = zv
+shaper_freq_x = 83.2
+shaper_type_y = zv
+shaper_freq_y = 58.6
+=======================
+mcu 'mcu': Starting serial connect
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+webhooks client 548398859072: New connection
+webhooks client 548398859072: Client info {'program': 'Moonraker', 'version': 'v0.9.3-3-gccfe32f'}
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+webhooks client 548398859072: Disconnected
+Restarting printer
+Start printer at Fri May  9 13:57:51 2025 (1746766671.7 1470.2)
+===== Config file =====
+[printer]
+kinematics = corexy
+max_velocity = 500
+max_accel = 15000
+max_z_velocity = 8
+square_corner_velocity = 5.0
+
+[stepper_x]
+step_pin = gpio6
+dir_pin = gpio3
+enable_pin = !gpio7
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = tmc2209_stepper_x:virtual_endstop
+position_endstop = 0
+position_max = 82
+homing_speed = 40
+homing_retract_dist = 0
+
+[tmc2209 stepper_x]
+uart_pin = gpio9
+uart_address = 0
+run_current = 0.5
+stealthchop_threshold = 999999
+diag_pin = ^gpio13
+driver_sgthrs = 30
+
+[stepper_y]
+step_pin = gpio1
+dir_pin = gpio0
+enable_pin = !gpio2
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = tmc2209_stepper_y:virtual_endstop
+position_endstop = 0
+position_max = 65
+homing_speed = 40
+homing_retract_dist = 0
+
+[tmc2209 stepper_y]
+uart_pin = gpio9
+uart_address = 1
+run_current = 0.5
+stealthchop_threshold = 999999
+diag_pin = ^gpio14
+driver_sgthrs = 24
+
+[stepper_z]
+step_pin = gpio26
+dir_pin = gpio25
+enable_pin = !gpio27
+microsteps = 16
+rotation_distance = 47.5
+endstop_pin = ^!gpio15
+position_min = -5.0
+position_max = 120
+homing_speed = 12
+position_endstop = 0.2
+
+[tmc2209 stepper_z]
+uart_pin = gpio9
+uart_address = 2
+run_current = 0.5
+stealthchop_threshold = 999999
+
+[pwm_tool LASER]
+pin = gpio10
+shutdown_value = 0
+
+[gcode_macro M02]
+gcode = 
+	G1 X0  F3000
+	
+	G1 Y57
+	M3
+	G1 Y63 F600
+	G1 Y57
+	G1 Y63
+	G1 Y60
+	M5
+	M18
+
+[gcode_macro M3]
+gcode = 
+	SET_PIN PIN=LASER VALUE=1
+	G4 P10
+
+[gcode_macro M5]
+gcode = 
+	G4 P2
+	SET_PIN PIN=LASER VALUE=0
+
+[gcode_macro LASER_ON]
+gcode = 
+	
+	SET_PIN PIN=LASER VALUE=1
+
+[gcode_macro LASER_OFF]
+gcode = 
+	SET_PIN PIN=LASER VALUE=0
+
+[gcode_macro G00]
+gcode = 
+	G1 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G01]
+gcode = 
+	G1 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G02]
+gcode = 
+	G2 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G03]
+gcode = 
+	G2 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro G04]
+gcode = 
+	G4 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro M03]
+gcode = 
+	M3 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[gcode_macro M05]
+gcode = 
+	M5 {% for p in params %}{'%s%s' % (p, params[p])}{% endfor %}
+
+[mcu]
+serial = /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00
+restart_method = command
+
+[virtual_sdcard]
+path = /home/ooe/printer_data/gcodes
+
+[display_status]
+
+[pause_resume]
+
+[gcode_arcs]
+resolution = 0.1
+
+[gcode_macro CANCEL_PRINT]
+rename_existing = BASE_CANCEL_PRINT
+gcode = 
+	BASE_CANCEL_PRINT
+
+[homing_override]
+set_position_x = 0
+set_position_y = 0
+set_position_z = 0
+gcode = 
+	{% set home_all = 'X' not in params and 'Y' not in params and 'Z' not in params %}
+	{% if home_all or 'X' in params %}
+	_HOME_X
+	{% endif %}
+	{% if home_all or 'Y' in params %}
+	_HOME_Y
+	{% endif %}
+	{% if home_all or 'Z' in params %}
+	
+	
+	{% endif %}
+axes = xyz
+
+[gcode_macro PAUSE]
+rename_existing = BASE_PAUSE
+gcode = 
+
+[gcode_macro RESUME]
+rename_existing = BASE_RESUME
+gcode = 
+
+[gcode_macro MOTOR_OFF]
+gcode = 
+	M18
+
+[gcode_macro _HOME_X]
+gcode = 
+	G28 X
+	G91
+	G1 X+5 F3000
+	G4 P2000
+
+[gcode_macro _HOME_Y]
+gcode = 
+	G28 Y
+	G91
+	G1 Y+5 F3000
+	G4 P100
+
+[input_shaper]
+shaper_type_x = zv
+shaper_freq_x = 83.2
+shaper_type_y = zv
+shaper_freq_y = 58.6
+=======================
+mcu 'mcu': Starting serial connect
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'
+webhooks client 548394598304: New connection
+webhooks client 548394598304: Client info {'program': 'Moonraker', 'version': 'v0.9.3-3-gccfe32f'}
+mcu 'mcu': Unable to open serial port: [Errno 2] could not open port /dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00: [Errno 2] No such file or directory: '/dev/serial/by-id/usb-Klipper_rp2040_E66260879764512D-if00'

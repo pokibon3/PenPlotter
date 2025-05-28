@@ -1,0 +1,3 @@
+~/klipper/scripts/calibrate_shaper.py /tmp/*_x_*.csv -o /tmp/shaper_calibrate_x.png
+~/klipper/scripts/calibrate_shaper.py /tmp/*_y_*.csv -o /tmp/shaper_calibrate_y.png
+scp ooe@pen-plotter:/tmp/shap_calibrate_x.png c:\work
